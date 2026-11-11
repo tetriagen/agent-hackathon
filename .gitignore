@@ -4,3 +4,12 @@ __pycache__/
 *.pyc
 .venv/
 data/*.db
+
+# Local browser tooling and generated evidence
+node_modules/
+.playwright/
+.playwright-cli/
+artifacts/*
+!artifacts/.gitkeep
+playwright-report/
+test-results/

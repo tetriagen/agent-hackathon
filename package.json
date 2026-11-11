@@ -1,0 +1,15 @@
+{
+  "name": "agent-hackathon-design-tools",
+  "private": true,
+  "description": "Optional local browser tooling for the Python/Streamlit app",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "browser:help": "playwright-cli --help",
+    "browser:install": "playwright-cli install-browser"
+  },
+  "devDependencies": {
+    "@playwright/cli": "0.1.24"
+  }
+}

@@ -71,3 +71,13 @@ belong in `.env.example`.
 
 The guard controls approval and output size; audit events are appended to
 `logs/audit.jsonl`. Treat this repository as the specified hackathon template.
+
+## Design toolkit / Набор для дизайна
+
+Для подготовки к хакатону добавлены DESIGN.md, Vercel Web Design Guidelines
+и навык Playwright CLI с reference-файлами. Это инструменты разработки;
+интерфейс приложения пока не переработан.
+
+**[Инструкция подключения с ноутбука](docs/DESIGN-TOOLKIT.md)**
+
+Правила проекта: [AGENTS.md](AGENTS.md). Визуальные правила: [DESIGN.md](DESIGN.md).
