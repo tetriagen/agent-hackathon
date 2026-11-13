@@ -36,7 +36,7 @@ def execute(name: str, args: dict, approved: bool) -> tuple[str, dict]:
             try:
                 result = clip(tool["fn"](**args))
             except Exception as e:
-                result = f"Error: {e}"
+                result = clip(f"Error: {e}")
         else:
             result = reason
     event = log_call(name, args, allowed, result)

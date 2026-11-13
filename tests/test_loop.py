@@ -75,3 +75,17 @@ def test_agent_stops_after_step_limit(loop, monkeypatch):
     assert loop.run_agent([], on_event=events.append) == "Step limit reached. Please rephrase or narrow the request."
     assert create.call_count == 8
     assert len(events) == 8
+
+
+def test_tool_exception_output_is_redacted_and_clipped(loop, monkeypatch):
+    fake_key = "sk-" + "not_a_real_key_1234567890"
+
+    def boom(**_):
+        raise RuntimeError(f"connection failed with {fake_key}")
+
+    monkeypatch.setattr(loop, "TOOLS", {"broken": {"fn": boom, "risky": False}})
+    result, event = loop.execute("broken", {}, False)
+    assert fake_key not in result
+    assert "[REDACTED]" in result
+    assert fake_key not in json.dumps(event)
+    assert event["allowed"] is True
