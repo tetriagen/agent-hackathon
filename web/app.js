@@ -76,6 +76,8 @@ for (const kind of ['estimate', 'bill']) {
     $(`${kind}-amount`).value = '';
     $(`${kind}-evidence`).textContent = '';
     $(`${kind}-parsed`).replaceChildren();
+    $(`${kind}-ai-result`).replaceChildren();
+    $(`${kind}-ai-consent`).checked = false;
     ocrUsed[kind] = false;
     invalidate();
     notice('Reading the document in your browser…');
@@ -97,6 +99,8 @@ for (const kind of ['estimate', 'bill']) {
     $(`${kind}-amount`).value = '';
     $(`${kind}-evidence`).textContent = 'Text changed. Find the total again or enter it manually.';
     $(`${kind}-parsed`).replaceChildren();
+    $(`${kind}-ai-result`).replaceChildren();
+    $(`${kind}-ai-consent`).checked = false;
   });
 }
 
@@ -106,6 +110,7 @@ $('review-form').addEventListener('change', event => { if (event.target.id !== '
 
 $('demo').addEventListener('click', () => {
   $('review-form').reset();
+  for (const kind of ['estimate', 'bill']) $(`${kind}-ai-result`).replaceChildren();
   ocrUsed.estimate = false; ocrUsed.bill = false;
   $('estimate-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nGood faith estimate\nOffice procedure: $900.00\nTotal estimated cost: $900.00';
   $('bill-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nMedical bill\nOffice procedure: $1,650.00\nTotal charges: $1,650.00';
@@ -124,6 +129,8 @@ $('reset').addEventListener('click', () => {
   for (const kind of ['estimate', 'bill']) {
     $(`${kind}-evidence`).textContent = '';
     $(`${kind}-parsed`).replaceChildren();
+    $(`${kind}-ai-result`).replaceChildren();
+    $(`${kind}-ai-consent`).checked = false;
     ocrUsed[kind] = false;
   }
   invalidate();
@@ -183,3 +190,41 @@ $('download').addEventListener('click', () => {
 });
 $('print').addEventListener('click', () => { if (draft) window.print(); });
 invalidate();
+
+
+// Explicitly separate remote PDF extraction from local reading and legal rules.
+document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener('click', async () => {
+  const kind = button.dataset.ai;
+  const file = $(`${kind}-file`).files[0];
+  if (!file || !/\.pdf$/i.test(file.name)) { notice('Select an original PDF before using AI. Pasted text is not sent.', true); return; }
+  if (!$(`${kind}-ai-consent`).checked) { notice('Confirm sending this original PDF to OpenAI first.', true); $(`${kind}-ai-consent`).focus(); return; }
+  if (file.size > 10 * 1024 * 1024) { notice('Choose a PDF up to 10 MB.', true); return; }
+  if (reading || controller) return;
+  const box = $(`${kind}-ai-result`);
+  box.replaceChildren();
+  const local = parseDocument($(`${kind}-text`).value, {usedOCR:ocrUsed[kind]});
+  reading++;
+  $('controls').disabled = true; $('demo').disabled = true; $('reset').disabled = true;
+  const abort = new AbortController();
+  const timeout = setTimeout(() => abort.abort(), 120000);
+  notice('Sending the original PDF to OpenAI and extracting fields…');
+  try {
+    const response = await fetch('/api/extract', {method:'POST', headers:{'Content-Type':'application/pdf','X-AI-Consent':'send-original-pdf'}, body:file, signal:abort.signal});
+    const data = await response.json();
+    if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'AI extraction failed.');
+    const result = data.extraction;
+    const title = document.createElement('h3'); title.textContent = 'Local rules vs AI'; box.append(title);
+    const info = document.createElement('p');
+    info.textContent = `Local type: ${local.type}. AI type: ${result.type}. Model: ${data.model}. ${data.seconds}s. AI fields are suggestions: verify each one against the PDF. Local rules used the editable text above; AI read the original PDF.`; box.append(info);
+    for (const [name, field] of Object.entries(result.fields)) {
+      const item = document.createElement('p');
+      const localValue = local.fields[name]?.value;
+      item.textContent = `${name.replaceAll('_', ' ')} — Local: ${localValue === null || localValue === undefined ? 'not found' : money.format(localValue)} · AI: ${field.value === null ? 'not found' : money.format(field.value)}${field.page ? ` · PDF page ${field.page}` : ''}`;
+      box.append(item);
+      if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`AI source excerpt (verify): ${field.evidence}`; box.append(source); }
+    }
+    for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;box.append(p); }
+    notice('AI comparison complete. Review the source PDF. AI values have not changed the confirmed facts below.');
+  } catch (error) { notice(error.name === 'AbortError' ? 'AI request timed out. Local rules still work.' : error.message, true); }
+  finally { clearTimeout(timeout); reading--; $('controls').disabled=false; $('demo').disabled=false; $('reset').disabled=false; }
+}));

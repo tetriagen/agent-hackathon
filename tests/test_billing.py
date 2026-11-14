@@ -90,6 +90,7 @@ def test_no_persistent_state_and_same_origin_headers(tmp_path, monkeypatch):
     assert list(tmp_path.iterdir()) == []
 
 
-def test_static_ui_and_health():
+def test_static_ui_and_health(monkeypatch):
+    monkeypatch.setattr("billing.api.settings", lambda: {"OPENAI_API_KEY": ""})
     assert client.get("/").status_code == 200
     assert client.get("/api/health").json()["ai_enabled"] is False

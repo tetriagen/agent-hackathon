@@ -1,17 +1,22 @@
-"""Same-origin API and static UI. No document upload, database, or LLM call."""
+"""Local rules plus explicitly opted-in remote PDF extraction."""
 
+import asyncio
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from openai import APIError, AuthenticationError, RateLimitError
 from pydantic import ValidationError
 
+from billing.extraction import extract_pdf, settings, validate_pdf
 from billing.models import ReviewRequest, ReviewResult
 from billing.rules import review_bill
 
 ROOT = Path(__file__).resolve().parent.parent
 app = FastAPI(title="ClearBill scaffold", version="0.1.0")
+ai_lock = asyncio.Lock()
+ai_requests = 0
 
 
 @app.middleware("http")
@@ -31,7 +36,71 @@ async def privacy_headers(request: Request, call_next):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "mode": "confirmed_facts", "ai_enabled": False}
+    return {
+        "status": "ok",
+        "mode": "confirmed_facts",
+        "ai_enabled": bool(settings()["OPENAI_API_KEY"]),
+    }
+
+
+@app.post("/api/extract")
+async def extract(request: Request):
+    global ai_requests
+    if request.headers.get("x-ai-consent") != "send-original-pdf":
+        raise HTTPException(400, "Confirm sending the original PDF to OpenAI.")
+    if request.headers.get("content-type") != "application/pdf":
+        raise HTTPException(415, "Choose a PDF file.")
+    config = settings()
+    if not config["OPENAI_API_KEY"]:
+        raise HTTPException(
+            503, "AI is not configured on this server. Local rules still work."
+        )
+    body = bytearray()
+    async for chunk in request.stream():
+        body.extend(chunk)
+        if len(body) > 10 * 1024 * 1024:
+            raise HTTPException(413, "Choose a PDF up to 10 MB.")
+    try:
+        pages = await asyncio.to_thread(validate_pdf, bytes(body))
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from None
+    if ai_lock.locked():
+        raise HTTPException(429, "Another AI request is running. Try again shortly.")
+    async with ai_lock:
+        try:
+            limit = max(0, min(100, int(config["CLEARBILL_AI_MAX_REQUESTS"])))
+        except ValueError:
+            raise HTTPException(
+                503, "Invalid server AI request limit configuration."
+            ) from None
+        if ai_requests >= limit:
+            raise HTTPException(
+                429,
+                "This server's demo AI request limit is reached. Local rules still work.",
+            )
+        ai_requests += 1
+        try:
+            return await extract_pdf(bytes(body), pages)
+        except AuthenticationError:
+            raise HTTPException(
+                503, "The server API key was rejected. Check its configuration."
+            ) from None
+        except RateLimitError as error:
+            if error.code == "credit_balance_exhausted":
+                raise HTTPException(
+                    429,
+                    "OpenAI API credits are exhausted. Add credits in API billing; local rules still work.",
+                ) from None
+            raise HTTPException(
+                429,
+                "OpenAI quota or rate limit reached. Check API billing or try later.",
+            ) from None
+        except (APIError, ValueError):
+            # Never echo provider error bodies or document text.
+            raise HTTPException(
+                502,
+                "AI extraction failed or returned incomplete fields. Local rules still work.",
+            ) from None
 
 
 @app.post("/api/review", response_model=ReviewResult)

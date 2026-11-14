@@ -1,7 +1,9 @@
 # ClearBill: working scaffold
 
 Plain browser UI + FastAPI. The original Streamlit app and agent remain available.
-This version deliberately needs no API key and makes no remote AI calls. Local Tesseract OCR recognizes English scans.
+Local mode needs no API key and makes no remote AI calls. Local Tesseract OCR
+recognizes English scans. Optional AI mode sends the original selected PDF to
+OpenAI only after explicit consent and a separate button click.
 
 ## Run
 
@@ -48,10 +50,10 @@ docker run --rm -p 8000:8000 clearbill
 - `tests/test_billing.py`: money boundaries, missing facts, API validation/privacy.
 - `tests/billing-client.test.mjs`: local extraction helpers and export content.
 
-The browser sends only six allowlisted fields: estimate amount, bill amount,
+The amount-comparison endpoint `/api/review` sends only six allowlisted fields: estimate amount, bill amount,
 payment type, same-provider answer, estimate-received answer, and 120-day-window
 answer. Files, filenames, document text, names, addresses, dates and account IDs
-are not included. Preview the exact JSON before submitting; unknown server fields
+are not included in that endpoint. Preview the exact JSON before submitting; unknown server fields
 are rejected. No database, body logging, analytics, localStorage or sessionStorage
 is used. UI state is lost on reload. The existing agent audit logger is not called.
 Infrastructure logs, browser extensions, device security and production hosting
@@ -73,7 +75,7 @@ still need review before real use; this is not a HIPAA compliance or zero-knowle
 
 ## Not implemented yet
 
-Standalone image uploads; semantic AI extraction; service-line matching; automated PII
+Standalone image uploads; service-line matching; automated PII
 redaction for sending free text; complete legal eligibility checks; saved cases;
 appeals submission; payments; insurance coverage or EOB correctness analysis; Medicare lookup.
 No legal finding or savings amount is inferred. The $400 screen does not validate
@@ -84,8 +86,9 @@ The exported letter requests an itemized explanation rather than asserting a vio
 
 1. Expand supported labels/layouts with representative tests; improve OCR table handling.
 2. Keep user confirmation before applying rules; add service-line matching.
-3. If adding remote AI, first implement and test local redaction and a new explicit
-   data-sharing boundary. Never route raw uploads through the legacy agent loop.
+3. Before processing sensitive real documents with AI, implement local redaction
+   and validate its limits. The current optional mode explicitly sends the original
+   unredacted PDF; never route uploads through the legacy agent loop.
 4. Add case export/import and handling of a provider response.
 5. Expand rule coverage against reviewed CMS sources; deploy and validate hosting.
 
@@ -96,7 +99,7 @@ The interface is intentionally minimal so it can be redesigned independently of 
 
 ## Verification of this scaffold
 
-- Python: 48 tests passed, including the original agent tests.
+- Python: 53 tests passed, including the original agent tests and AI boundary tests.
 - JavaScript: 8 parser/export tests passed.
 - Ruff check and format check passed for changed Python code.
 - Chromium: synthetic example, changed amounts, missing answers, network failure,
@@ -110,3 +113,53 @@ The interface is intentionally minimal so it can be redesigned independently of 
 - EOB rejection and invalid-PDF stale-state clearing verified in Chromium.
 - Production deployment and Docker build have not been verified.
 - See [PDF test results](PDF-TEST-RESULTS.json) for extracted amounts and limitations.
+
+
+## Optional OpenAI extraction
+
+The server reads `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-4.1-mini`), and
+`CLEARBILL_AI_MAX_REQUESTS` (default 20) from environment variables or the local
+ignored `.env`. Keys never go to the browser. In Docker, pass environment variables;
+the image does not copy `.env`.
+
+Select a PDF, check the separate data-sharing consent, and click **Compare with AI**.
+This sends the **original unredacted PDF**, including images and any personal data,
+to `/api/extract` and then OpenAI. Editing the local text does not redact the PDF.
+The new boundary is deliberately visible; this is not zero-knowledge processing.
+
+The Responses API returns a structured extraction with four nullable amounts,
+source excerpts, PDF pages, document type, and warnings. AI values do not overwrite
+confirmed facts or make legal decisions. Excerpts and figures still need visual
+verification. API response storage is disabled with `store=False`; that is not a
+promise of zero provider retention. No Files API objects are created.
+
+The server accepts PDFs up to 10 MB and 30 pages, rejects encrypted PDFs, runs one
+AI call at a time, disables automatic SDK retries and uses a 110-second timeout.
+The per-process attempt cap is bounded at 100 and resets on restart. It is a demo
+limit, not a durable production billing control; multiple workers have separate
+counters. A public deployment needs durable rate/cost limits.
+
+On 2026-11-14 the live request was blocked by HTTP 429
+`credit_balance_exhausted` / `insufficient_quota`. The first PDF was attempted twice
+(the second call identified the precise provider code). No model output was
+obtained; the other four were not sent. No AI accuracy score is available yet.
+UI success was checked using an explicitly mocked response, not a live AI result;
+consent, original-PDF transfer, non-overwrite of facts, quota error recovery and
+390/1440px layouts were tested. Existing local functionality remains available.
+
+The five-sample expected values are independently recorded in
+`tests/fixtures/pdf-expected.json`. To run the comparison after activating credits:
+
+```bash
+.venv/bin/python -m billing.compare_samples /path/to/billing-examples /path/to/comparison.json
+```
+
+This command intentionally makes paid calls for five public samples and stops on
+billing/authentication errors. Local rules read PDF.js/OCR text; AI reads original
+PDFs. Results compare complete pipelines, not identical text inputs. Check source
+excerpts, page references and warnings manually in addition to numeric scores.
+
+Official API references:
+- https://developers.openai.com/api/docs/guides/file-inputs
+- https://developers.openai.com/api/docs/guides/structured-outputs
+- https://developers.openai.com/api/docs/guides/chatgpt-api-credits

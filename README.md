@@ -4,7 +4,8 @@
 
 The medical-bill prototype lives in `billing/` + `web/`. It reads PDF/TXT documents and scanned PDFs locally, extracts labeled fields
 using deterministic rules, compares user-confirmed amounts through FastAPI, and
-exports a draft request. No API key or remote language model is used.
+exports a draft request. Local mode needs no API key. An optional, explicitly consented OpenAI PDF
+extraction mode compares AI fields with local rules.
 
 **[Run ClearBill and see the implementation boundaries](docs/CLEARBILL.md)**
 
