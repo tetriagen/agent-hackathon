@@ -44,8 +44,6 @@
           <details class="text-details"><summary>Paste or inspect document text</summary><label for="estimate-text">Estimate text — stays in your browser</label>
           <textarea id="estimate-text" rows="8" maxlength="100000" spellcheck="false" name="estimate-text"></textarea>
           <button class="btn btn--secondary" type="button" data-suggest="estimate">Read document fields</button></details>
-          <div class="ai-controls"><p class="ai-heading">Optional AI review <span>Find inconsistencies</span></p><label class="check"><input id="estimate-ai-consent" type="checkbox" name="estimate-ai-consent"><span>I agree to send this original PDF to <span class="ai-provider">the configured AI provider</span> for extraction. It is not redacted; edits to the text above do not change the file.</span></label>
-          <button class="btn btn--secondary" type="button" data-ai="estimate" disabled>Review PDF with AI <span aria-hidden="true">↗</span></button></div>
         </section>
         <section class="document-card" aria-labelledby="bill-title">
           <div class="document-heading"><span class="document-number">02</span><div><h3 id="bill-title">Your bill or EOB</h3><p>The charges or insurance explanation you received.</p></div></div>
@@ -53,11 +51,13 @@
           <details class="text-details"><summary>Paste or inspect document text</summary><label for="bill-text">Bill text — stays in your browser</label>
           <textarea id="bill-text" rows="8" maxlength="100000" spellcheck="false" name="bill-text"></textarea>
           <button class="btn btn--secondary" type="button" data-suggest="bill">Read document fields</button></details>
-          <div class="ai-controls"><p class="ai-heading">Optional AI review <span>Find inconsistencies</span></p><label class="check"><input id="bill-ai-consent" type="checkbox" name="bill-ai-consent"><span>I agree to send this original PDF to <span class="ai-provider">the configured AI provider</span> for extraction. It is not redacted; edits to the text above do not change the file.</span></label>
-          <button class="btn btn--secondary" type="button" data-ai="bill" disabled>Review PDF with AI <span aria-hidden="true">↗</span></button></div>
         </section>
       </div>
 
+      <div class="ai-controls shared-ai"><p class="ai-heading">Review your documents <span>Find inconsistencies</span></p>
+      <p id="ai-selection" class="note">Choose a PDF to use AI review. Text files and pasted text stay local.</p>
+      <label class="check"><input id="ai-consent" type="checkbox" name="ai-consent"><span>I agree to send the selected original PDFs to <span class="ai-provider">the configured AI provider</span>. They may contain personal information and are not redacted. Editing the text above does not change the PDFs sent.</span></label>
+      <button class="btn btn--primary" type="button" id="review-ai" disabled>Review with AI <span aria-hidden="true">↗</span></button></div>
       <div class="step-actions"><span>Next, check what your documents say.</span><button type="button" id="to-verify" class="btn btn--primary">Next: verify findings →</button></div>
       </section>
       <section id="step-verify" class="review-step" hidden aria-labelledby="verify-title">

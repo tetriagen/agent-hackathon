@@ -90,7 +90,7 @@ for (const kind of ['estimate', 'bill']) {
     $(`${kind}-evidence`).textContent = '';
     $(`${kind}-parsed`).replaceChildren();
     clearAI(kind);
-    $(`${kind}-ai-consent`).checked = false;
+    $('ai-consent').checked = false;
     ocrUsed[kind] = false;
     invalidate();
     notice('Reading the document in your browser…');
@@ -117,7 +117,7 @@ for (const kind of ['estimate', 'bill']) {
     $(`${kind}-evidence`).textContent = 'Text changed. Find the total again or enter it manually.';
     $(`${kind}-parsed`).replaceChildren();
     clearAI(kind);
-    $(`${kind}-ai-consent`).checked = false;
+    $('ai-consent').checked = false;
   });
 }
 
@@ -128,6 +128,7 @@ for (const type of ['input', 'change']) $('review-form').addEventListener(type, 
 
 $('demo').addEventListener('click', () => {
   $('review-form').reset();
+  updateAISelection();
   for (const kind of ['estimate', 'bill']) clearAI(kind);
   ocrUsed.estimate = false; ocrUsed.bill = false;
   $('estimate-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nGood faith estimate\nOffice procedure: $900.00\nTotal estimated cost: $900.00';
@@ -146,11 +147,12 @@ $('reset').addEventListener('click', () => {
   generation++;
   controller?.abort();
   $('review-form').reset();
+  updateAISelection();
   for (const kind of ['estimate', 'bill']) {
     $(`${kind}-evidence`).textContent = '';
     $(`${kind}-parsed`).replaceChildren();
     clearAI(kind);
-    $(`${kind}-ai-consent`).checked = false;
+    $('ai-consent').checked = false;
     ocrUsed[kind] = false;
   }
   invalidate();
@@ -345,25 +347,22 @@ function renderDuplicates(box, result) {
   box.append(section);
 }
 
-// AI reads source sections; deterministic code checks the payment arithmetic.
-document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener('click', async () => {
-  if (!aiProvider) { notice('AI is not configured. Local reading still works.', true); return; }
-  const kind = button.dataset.ai;
-  const file = $(`${kind}-file`).files[0];
-  if (!file || !/\.pdf$/i.test(file.name)) { notice('Select an original PDF before using AI. Pasted text is not sent.', true); return; }
-  if (!$(`${kind}-ai-consent`).checked) { notice(`Confirm sending this original PDF to ${aiProviderLabel} first.`, true); $(`${kind}-ai-consent`).focus(); return; }
-  if (file.size > 10 * 1024 * 1024) { notice('Choose a PDF up to 10 MB.', true); return; }
-  if (reading || controller) return;
-  clearAI(kind);
-  refreshSteps();
+// One explicit consent covers the selected original PDFs. Each keeps its own findings.
+function selectedPDFs() {
+  return ['estimate', 'bill'].map(kind => ({kind, file: $(`${kind}-file`).files[0]}))
+    .filter(({file}) => file && /\.pdf$/i.test(file.name));
+}
+function updateAISelection() {
+  const selected = selectedPDFs();
+  $('ai-selection').textContent = selected.length
+    ? `PDFs for review: ${selected.map(({file}) => file.name).join(' · ')}. Text files and pasted text are not sent.`
+    : 'Choose a PDF to use AI review. Text files and pasted text stay local.';
+}
+async function reviewPDF(kind, file) {
   const box = $(`${kind}-ai-result`);
   const local = parseDocument($(`${kind}-text`).value, {usedOCR:ocrUsed[kind]});
-  reading++;
-  $('controls').disabled = true; $('demo').disabled = true; $('reset').disabled = true;
   const abort = new AbortController();
   const timeout = setTimeout(() => abort.abort(), 120000);
-  notice(`Reading the original PDF with ${aiProviderLabel} and checking related payment totals…`);
-  beginProcessing('Reviewing your document…', `The PDF you approved is being reviewed with ${aiProviderLabel}.`);
   try {
     const response = await fetch('/api/extract', {method:'POST', headers:{'Content-Type':'application/pdf','X-AI-Consent':'send-original-pdf','X-AI-Provider':aiProvider}, body:file, signal:abort.signal});
     const data = await response.json();
@@ -389,14 +388,44 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
       if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`AI source excerpt (verify): ${field.evidence}`; extractionDetails.append(source); }
     }
     for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;extractionDetails.append(p); }
+  } finally { clearTimeout(timeout); }
+}
+$('review-ai').addEventListener('click', async () => {
+  if (reading || controller) return;
+  if (!aiProvider) { notice('AI is not configured. Local reading still works.', true); return; }
+  const selected = selectedPDFs();
+  if (!selected.length) { notice('Select an original PDF before using AI. Pasted text is not sent.', true); return; }
+  if (!$('ai-consent').checked) { notice(`Confirm sending the selected PDFs to ${aiProviderLabel} first.`, true); $('ai-consent').focus(); return; }
+  if (selected.some(({file}) => file.size > 10 * 1024 * 1024)) { notice('Each PDF must be no larger than 10 MB.', true); return; }
+  for (const {kind} of selected) clearAI(kind);
+  refreshSteps();
+  reading++;
+  $('controls').disabled = true; $('demo').disabled = true; $('reset').disabled = true;
+  beginProcessing('Reviewing your documents…', `The selected PDFs are being reviewed with ${aiProviderLabel}.`);
+  let completed = 0;
+  try {
+    for (const {kind, file} of selected) {
+      notice(`Reviewing document ${completed + 1} of ${selected.length}: ${file.name}…`);
+      await reviewPDF(kind, file);
+      completed++;
+    }
     refreshSteps();
     await finishProcessing('Your findings are ready to verify.');
     showReviewTab('findings');
     showReviewStep('verify');
-    notice(`${data.consistency?.status === 'review_needed' ? 'Potential payment mismatch found. ' : ''}AI review complete. Review the source PDF. AI values have not changed the confirmed facts below.`);
-  } catch (error) { failProcessing(); notice(error.name === 'AbortError' ? 'AI request timed out. Local rules still work.' : error.message, true); }
-  finally { clearTimeout(timeout); reading--; $('notice').classList.remove('busy'); $('controls').disabled=false; $('demo').disabled=false; $('reset').disabled=false; }
-}));
+    notice(`AI review complete for ${completed} PDF${completed === 1 ? '' : 's'}. Verify the findings against your originals. Nothing has been sent to your insurer.`);
+  } catch (error) {
+    failProcessing();
+    refreshSteps();
+    const reason = error.name === 'AbortError' ? 'AI request timed out.' : error.message;
+    notice(`${reason} ${completed} of ${selected.length} PDFs reviewed. Completed findings remain available through Next; local reading still works.`, true);
+  } finally {
+    reading--; $('notice').classList.remove('busy');
+    $('controls').disabled = false; $('demo').disabled = false; $('reset').disabled = false;
+  }
+});
+for (const kind of ['estimate', 'bill']) $(`${kind}-file`).addEventListener('change', updateAISelection);
+updateAISelection();
 
 
 async function configureAI() {
@@ -414,7 +443,7 @@ async function configureAI() {
     $('ai-privacy').textContent = aiProvider === 'gemini'
       ? 'Gemini Free Tier may use submitted data to improve Google products. Use public samples or synthetic documents for this demo.'
       : 'AI sends the original unredacted PDF to OpenAI. Verify the extracted values before using them.';
-    document.querySelectorAll('[data-ai]').forEach(button => {button.disabled=false;});
+    $('review-ai').disabled = false;
   } catch { $('ai-privacy').textContent = 'Could not check AI availability. Local reading still works.'; }
 }
 setupReviewSteps(() => reading > 0 || Boolean(controller));

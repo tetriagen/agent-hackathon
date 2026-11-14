@@ -75,3 +75,9 @@ Verified in Chromium: minimum successful presentation time, completion phase, ma
 The review now shows one step at a time: read documents, verify findings, prepare a letter. Verification has keyboard-accessible Document findings and Self-pay comparison tabs. Local extraction and AI findings appear in verification; drafts only appear on the letter step. AI drafts require a source-check confirmation before continuing. Self-pay comparison must succeed before its Next button enables. Navigation preserves edits; replacing a document clears its AI draft, and changing comparison facts clears its self-pay draft. Printing still targets only the self-pay letter. Later steps use a compact page header.
 
 Verified desktop/mobile navigation, empty state, keyboard tabs, self-pay success and invalidation, mocked AI findings/confirmation/draft editing/document replacement, comparison error recovery, and print visibility. No live AI requests were used. Client tests, JavaScript syntax and diff whitespace checks pass.
+
+### Shared AI action
+
+Replaced per-document AI consent and review buttons with one shared consent and one Review with AI action below the upload cards. The selected PDF filenames are listed before consent; text files and pasted text remain local. Original PDFs are processed sequentially with one loading animation and separate findings per document. Changing a file or its text clears shared consent. Partial failures retain completed findings and state how many PDFs were reviewed.
+
+Browser verification used mocked responses: consent gating, two PDFs, a single PDF alongside a text file, replacement consent reset, partial failure, desktop/mobile layout, and no runtime exceptions. No live AI requests were sent.
