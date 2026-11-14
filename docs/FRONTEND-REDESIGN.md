@@ -47,3 +47,11 @@ The new hero uses original HTML medical-document illustrations, clearly marked s
 Pointer movement changes document perspective; native scrolling gathers the cards. There is no idle animation, scroll hijacking or network request for the decorative documents. Reduced-motion users see a static composition. The review workspace and API behavior are unchanged.
 
 Playwright verification passed at 1440, 1024, 768, 390 and 320 px: no horizontal overflow, CTA visible at the tested 900 px height, pointer and scroll reactions, static reduced-motion state, and the full synthetic self-pay comparison returning $750. Additional 390×844 screenshot inspected. No page errors. New hero screenshots are in the workspace work directory.
+
+## Floating documents and gated workspace
+
+Cards now levitate with individual low-frequency phases. Pointer and scroll input use frame-rate-independent exponential smoothing. Scrolling gathers the documents into a pink folder, shrinks it into the Check your bill icon, and triggers a single magnifier sweep. Scrolling backward restores the scene. A pause control freezes autonomous movement; reduced motion disables the choreography. Rendering stops when offscreen or the tab is hidden. Geometry is measured on scroll/resize, not on every animation frame.
+
+The workspace starts hidden, including when opening a saved #workspace URL. Check your bill reveals it and moves keyboard focus to its heading. Privacy information opens in a separate native dialog without revealing the workspace. Reload starts again with the workspace hidden; no entered data is persisted.
+
+Browser checks passed: levitation, pause/resume, folder docking, reverse scroll, reduced motion, 390 px overflow check, CTA; initial hidden state, separate privacy dialog and Escape, click-to-open, synthetic comparison and hidden state after reload.

@@ -31,3 +31,8 @@ fieldset{margin:0;padding:0;border:0;min-width:0} .file-guidance{font-size:13px;
 .extraction-details{border-top:1px solid var(--line);margin-top:24px;padding-top:8px}
 .extraction-details h3{margin-block:16px}
 .comparison-panel{scroll-margin-top:32px}
+#privacy-dialog{width:min(560px,calc(100% - 32px));max-height:calc(100svh - 48px);overflow:auto;border:1px solid var(--line);border-radius:16px;background:var(--p-surface);color:var(--ink);padding:28px}
+#privacy-dialog::backdrop{background:#000b;backdrop-filter:blur(5px)}
+.privacy-dialog-heading{display:flex;align-items:start;gap:24px;margin-bottom:24px}
+.privacy-dialog-heading h2{font-size:28px}.privacy-dialog-heading button{flex:none}
+@media(max-width:600px){#privacy-dialog{padding:20px}.privacy-dialog-heading{flex-direction:column;gap:16px}}
