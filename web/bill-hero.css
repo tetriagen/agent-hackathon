@@ -60,3 +60,43 @@
 /* The page scrolls freely while the documents gather; no pinned animation runway. */
 .bill-hero{height:auto}
 .bill-stage{position:relative;top:auto}
+
+/* Fit the complete document content inside each face at every card size. */
+.paper-front>*{flex-shrink:0}
+.paper-top{line-height:1.2}
+.paper-rule{margin:5px 0}
+.paper-kicker{font-size:7px;line-height:1.2;margin-bottom:4px}
+.paper-front h3{font-size:19px;line-height:1.08;min-height:42px;letter-spacing:-.5px}
+.paper-lines{margin:6px 0;gap:3px}
+.paper-lines i{height:2px}
+.paper-caption{font-size:7px;line-height:1.25}
+.paper-amount{font-size:26px;line-height:1.15;margin:3px 0 8px;white-space:nowrap}
+.paper-row{font-size:6px;line-height:1.35;padding:4px 0;align-items:baseline}
+.paper-row b{white-space:nowrap;flex:none}
+.paper-foot{font-size:6px;line-height:1.3;gap:5px;padding-top:7px}
+.paper-foot span:last-child{white-space:nowrap;flex:none}
+.paper-back>span{font-size:150px;line-height:.9}
+.paper-back p{line-height:1.2}
+.paper-back small{line-height:1.3}
+@media(min-width:1600px){.paper-front h3{font-size:23px;min-height:50px}.paper-amount{font-size:30px}.paper-row{font-size:8px}.paper-back>span{font-size:180px}}
+@media(max-width:1024px){.paper-front h3{font-size:17px;min-height:37px}.paper-amount{font-size:24px}.paper-back>span{font-size:130px}}
+@media(max-width:600px){
+ .paper-front h3{font-size:15px;min-height:33px;letter-spacing:-.3px}
+ .paper-front .paper-rule{margin:3px 0}
+ .paper-lines{margin:4px 0}
+ .paper-amount{font-size:23px;margin:2px 0 6px}
+ .paper-row{padding:3px 0}
+ .paper-foot{padding-top:5px}
+ .paper-back>span{font-size:115px}
+ .paper-back p{font-size:20px}
+}
+
+/* The header and lower sections share the existing page grid. */
+.landing-page .site-header .wrap{width:min(1280px,calc(100% - 96px));max-width:1280px}
+@media(min-width:768px) and (max-width:1024px){.landing-page .site-header .wrap{width:calc(100% - 64px)}}
+@media(max-width:767px){.landing-page .site-header .wrap{width:calc(100% - 40px)}}
+
+/* One primary action style; the hero keeps its animated folder icon. */
+.landing-page a.btn--primary{min-height:52px;border-radius:50px;padding:10px 24px;gap:16px;background:#f2b0a5;color:#201717;border:1px solid #f2b0a5;font-size:15px;font-weight:500}
+.landing-page a.btn--primary:hover{background:#f9c5bc;border-color:#f9c5bc}
+.landing-page .bill-hero-action a.btn--primary{padding:8px 24px 8px 12px}

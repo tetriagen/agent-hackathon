@@ -188,3 +188,9 @@ Awwwards MCP was not found in connected tools or plugin discovery, so it was not
 
 66. `hero-fold` — section.bill-hero section.bill-hero "PAYING TOO MUCH? PDFClearBill / ": starts at y 76, not under the nav
 
+
+## Follow-up: three authorized landing fixes
+
+The user subsequently authorized three narrow landing fixes: clipped text inside PDF cards, inconsistent Check your bill buttons, and header/section gutters. Updated only bill-hero.css: fitted text and back-face artwork inside the existing card sizes, standardized primary button radius/height/color/type (retaining the hero folder icon), and matched header gutters to the existing lower sections at desktop, tablet and mobile breakpoints. Decorative clipping at the scene/screen edges and the original choreography remain intentional.
+
+Verified 1920, 1440, 1024, 768, 390 and 320 px: no overflow within card faces, no page horizontal overflow, matching header/section edges, consistent primary button computed styles. Inspected desktop/mobile screenshots. Your privacy opens its dialog and closes with Escape; free scrolling still works; no JavaScript runtime errors. The earlier 66-item list is historical, not a fresh count after these fixes.
