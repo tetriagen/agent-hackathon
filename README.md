@@ -7,7 +7,8 @@ using deterministic rules, compares user-confirmed amounts through FastAPI, and
 exports a draft request. Local mode needs no API key. An optional, explicitly consented Gemini or OpenAI PDF
 extraction mode compares AI fields with local rules.
 It also checks EOB total payments against payment-distribution rows and shows
-source pages for potential discrepancies.
+source pages for potential discrepancies. A detected mismatch automatically produces
+an editable letter to the insurer, with copy/TXT download and no additional AI call.
 
 **[Run ClearBill and see the implementation boundaries](docs/CLEARBILL.md)**
 

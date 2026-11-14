@@ -41,7 +41,7 @@ docker run --rm -p 8000:8000 clearbill
 ## Boundaries
 
 - `web/app.js`: local PDF/TXT ingestion, explicit confirmation, API client, exports.
-- `web/core.mjs`: answer conversion and draft letter assembly.
+- `web/core.mjs`: answer conversion, billing draft and EOB insurance-letter assembly.
 - `web/ingestion.mjs`: local PDF text extraction and OCR, with size/page limits.
 - `web/document-parser.mjs`: document classification and labeled amount extraction.
 - `billing/models.py`: strict schema, USD decimal strings, unknown answers allowed.
@@ -69,6 +69,8 @@ still need review before real use; this is not a HIPAA compliance or zero-knowle
 - EOB billed charges, plan payment and patient responsibility remain separate.
 - Optional AI-assisted EOB payment reconciliation: printed total payment versus
   the sum of complete distribution rows, with source pages and skipped-check reasons.
+- Automatic editable insurance clarification letter for supported payment mismatches,
+  with source amounts/pages, clipboard copy and TXT download. No extra AI call.
 - EOB and teaching-example documents are blocked from the self-pay comparison.
 - Editable, user-confirmed facts; changes invalidate stale results and confirmation.
 - Exact money comparison and preliminary self-pay routing.
@@ -103,7 +105,7 @@ The interface is intentionally minimal so it can be redesigned independently of 
 ## Verification of this scaffold
 
 - Python: 74 tests passed, including the original agent tests, AI boundaries and payment reconciliation.
-- JavaScript: 8 parser/export tests passed.
+- JavaScript: 12 parser/export/insurance-letter tests passed.
 - Ruff check and format check passed for changed Python code.
 - Chromium: synthetic example, changed amounts, missing answers, network failure,
   recovery controls, TXT download and case reset checked.
@@ -213,3 +215,32 @@ Gemini API references:
 - https://aistudio.google.com/docs/models/gemini-3.5-flash-lite
 - https://aistudio.google.com/docs/document-processing?generate-content=true
 - https://aistudio.google.com/docs/structured-output?generate-content=true
+
+## Insurance clarification letter
+
+After **Compare with AI** finds a supported payment mismatch, an editable English
+letter appears automatically below the payment check. It lists each discrepant
+comparison separately, its total payment, distribution rows, difference and PDF
+pages. It asks the insurer to confirm the scope, explain the difference and issue
+a corrected EOB if needed. It does not claim an overcharge, refund or legal breach.
+
+The letter is assembled locally from the completed comparison, without another
+AI request. Free-form model warnings, explanations, identities and instructions
+are not inserted. Name, member ID, claim reference and service-date placeholders
+must be filled by the user after checking the original PDF. Copy and TXT download
+use the user's edited text. No email or claim is sent by the application; edits
+remain in page memory and are lost on reload. Editing the source text, selecting
+a new file or clearing the case removes the old result and letter.
+
+Matching, skipped or unsupported comparisons do not produce a mismatch letter.
+For the five previously captured Gemini results, only Jane Jones produces one,
+containing $43.06, $53.83 and $10.77 with page 1 references. This replay used no
+additional model calls.
+
+Verification: four new pure-function tests cover actual figures/pages, unknown
+sources, separate comparisons with both difference directions, and exclusion of
+free-form model instructions. Chromium checks with synthetic responses covered
+automatic creation, editing, exact clipboard and downloaded content, clipboard
+failure fallback, empty text, stale-state removal and no letter for match/skip.
+No extra network requests occurred when editing, copying or downloading. Both
+390px and 1440px layouts passed visual/overflow checks; no JavaScript errors.

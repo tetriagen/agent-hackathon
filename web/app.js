@@ -1,4 +1,4 @@
-import { answer, draftLetter } from './core.mjs';
+import { answer, draftLetter, draftInsuranceLetter } from './core.mjs';
 import { parseDocument } from './document-parser.mjs';
 import { readDocument } from './ingestion.mjs';
 
@@ -194,6 +194,58 @@ $('print').addEventListener('click', () => { if (draft) window.print(); });
 invalidate();
 
 
+function renderInsuranceLetter(box, result) {
+  const letter = draftInsuranceLetter(result);
+  if (!letter) return;
+  const section = document.createElement('section');
+  section.className = 'insurance-letter';
+  const title = document.createElement('h3');
+  title.textContent = 'Your letter to the insurance company';
+  const note = document.createElement('p');
+  note.className = 'note';
+  note.textContent = 'Review the amounts and pages in the original PDF, then replace the bracketed details before sending. You can edit this draft below. Nothing is sent automatically.';
+  const label = document.createElement('label');
+  const editor = document.createElement('textarea');
+  editor.id = `${box.id}-insurance-letter`;
+  editor.name = editor.id;
+  editor.rows = 18;
+  editor.autocomplete = 'off';
+  editor.value = letter;
+  label.htmlFor = editor.id;
+  label.textContent = 'Editable letter';
+  const status = document.createElement('p');
+  status.className = 'note';
+  status.setAttribute('role', 'status');
+  status.textContent = 'Prepared from the payment comparison. No extra AI request. Edits stay in this page and are lost on reload.';
+  const copy = document.createElement('button');
+  copy.type = 'button';
+  copy.textContent = 'Copy letter';
+  copy.addEventListener('click', async () => {
+    if (!editor.value.trim()) { status.textContent = 'The letter is empty. Add text before copying.'; editor.focus(); return; }
+    try {
+      await navigator.clipboard.writeText(editor.value);
+      if (editor.isConnected) status.textContent = 'Letter copied. Paste it into your insurer’s message form or email.';
+    } catch {
+      if (!editor.isConnected) return;
+      editor.focus(); editor.select();
+      status.textContent = 'Automatic copying is unavailable. The letter is selected; use your device’s Copy command or download it.';
+    }
+  });
+  const download = document.createElement('button');
+  download.type = 'button';
+  download.textContent = 'Download letter (.txt)';
+  download.addEventListener('click', () => {
+    if (!editor.value.trim()) { status.textContent = 'The letter is empty. Add text before downloading.'; editor.focus(); return; }
+    const url = URL.createObjectURL(new Blob([editor.value], {type:'text/plain;charset=utf-8'}));
+    const link = document.createElement('a');
+    link.href = url; link.download = 'insurance-payment-clarification.txt'; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    status.textContent = 'Download requested. Review your details before sending the letter.';
+  });
+  section.append(title, note, label, editor, copy, download, status);
+  box.append(section);
+}
+
 function renderConsistency(box, result) {
   const section = document.createElement('section');
   section.className = 'consistency';
@@ -260,6 +312,7 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
     if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'AI extraction failed.');
     const result = data.extraction;
     renderConsistency(box, data.consistency);
+    renderInsuranceLetter(box, data.consistency);
     const title = document.createElement('h3'); title.textContent = 'Local rules vs AI'; box.append(title);
     const info = document.createElement('p');
     info.textContent = `Local type: ${local.type}. AI type: ${result.type}. Model: ${data.model}. ${data.seconds}s. AI fields are suggestions: verify each one against the PDF. Local rules used the editable text above; AI read the original PDF.`; box.append(info);
