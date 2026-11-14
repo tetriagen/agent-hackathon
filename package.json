@@ -1,15 +1,19 @@
 {
   "name": "agent-hackathon-design-tools",
   "private": true,
-  "description": "Optional local browser tooling for the Python/Streamlit app",
+  "description": "ClearBill local PDF reader and browser verification tools",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "browser:help": "playwright-cli --help",
-    "browser:install": "playwright-cli install-browser"
+    "browser:install": "playwright-cli install-browser",
+    "test:client": "node --test tests/billing-client.test.mjs"
   },
   "devDependencies": {
     "@playwright/cli": "0.1.24"
+  },
+  "dependencies": {
+    "pdfjs-dist": "6.5.438"
   }
 }

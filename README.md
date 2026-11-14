@@ -1,5 +1,15 @@
 # agent-hackathon
 
+## ClearBill scaffold
+
+The medical-bill prototype lives in `billing/` + `web/`. It reads text PDF/TXT
+documents locally, compares user-confirmed amounts through FastAPI, and exports
+a draft request. No API key is needed. AI extraction and OCR are not yet connected.
+
+**[Run ClearBill and see the implementation boundaries](docs/CLEARBILL.md)**
+
+The original business-agent template below is preserved separately.
+
 Python template for a business assistant: an OpenAI Responses API tool-use loop,
 Streamlit chat UI, approval guard, and JSONL audit log. Includes a read-only SQLite
 query tool and a message-sending stub. No business-specific logic is implemented.

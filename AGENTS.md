@@ -1,6 +1,10 @@
 # Project guidance
 
-This is a generic Python / Streamlit hackathon starter. No business case is selected.
+This repository includes a Python / Streamlit hackathon starter and a ClearBill
+medical-bill scaffold. ClearBill uses `billing/` + `web/`; run with
+`python -m uvicorn billing.api:app --port 8000 --no-access-log`.
+Read docs/CLEARBILL.md for scope and privacy boundaries. Keep the UI minimal until
+the user requests design work. Do not send raw documents through the legacy agent.
 Preserve the existing application and agent behavior unless the task requests changes.
 Preserve the logic of agent/guard.py unless the user explicitly authorizes changing it.
 

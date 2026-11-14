@@ -1,0 +1,27 @@
+:root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #0f172a; background: #f8fafc; }
+body { margin: 0 auto; padding: 20px; max-width: 1000px; }
+main { padding-bottom: 50px; }
+h1 { font-size: 30px; margin-bottom: 4px; }
+h2 { font-size: 21px; margin-top: 24px; }
+fieldset, #result { margin-top: 20px; padding: 20px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; min-width: 0; }
+legend { font-weight: 600; }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.columns > * { min-width: 0; }
+label { display: block; margin-top: 14px; margin-bottom: 5px; }
+input, select, textarea, button { font: inherit; box-sizing: border-box; max-width: 100%; }
+input:not([type=checkbox]), select, textarea { width: 100%; border: 1px solid #64748b; padding: 10px; border-radius: 4px; background: white; color: #0f172a; }
+textarea { resize: vertical; }
+button { min-height: 44px; padding: 8px 14px; margin: 12px 8px 0 0; border: 1px solid #64748b; border-radius: 4px; background: #f1f5f9; cursor: pointer; }
+button:hover { background: #e2e8f0; }
+#analyze { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+button:disabled { cursor: wait; opacity: .65; }
+:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 3px; }
+.note { color: #475569; }
+.check { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.check input { width: 20px; height: 20px; flex-shrink: 0; }
+pre { background: #f1f5f9; padding: 14px; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.6 ui-monospace, monospace; }
+#notice { padding: 12px; border-left: 3px solid #64748b; }
+#notice.error { border-color: #b91c1c; color: #991b1b; }
+a { color: #1d4ed8; }
+@media (max-width: 650px) { .columns { grid-template-columns: 1fr; } body { padding: 12px; } fieldset, #result { padding: 12px; } }
+@media print { body { background: white; } body > a, main > :not(#result), #result > :not(#letter) { display: none; } #result { border: 0; padding: 0; } #letter { background: white; } }

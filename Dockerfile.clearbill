@@ -1,0 +1,16 @@
+FROM node:22-slim AS browser-deps
+WORKDIR /build
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY billing ./billing
+COPY web ./web
+COPY --from=browser-deps /build/node_modules/pdfjs-dist/build ./node_modules/pdfjs-dist/build
+RUN useradd --create-home appuser
+USER appuser
+EXPOSE 8000
+CMD ["python", "-m", "uvicorn", "billing.api:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]

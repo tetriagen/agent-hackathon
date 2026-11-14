@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClearBill — medical bill review</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+<a href="#main">Skip to review</a>
+<main id="main">
+  <h1>ClearBill</h1>
+  <p>Compare a medical bill with your estimate. Prepare your next step.</p>
+  <p class="note">Early prototype · Self-pay comparison · No AI analysis yet</p>
+  <p>Files and document text stay in this browser. Only the amounts and answers shown below are sent to the server. Nothing is saved after a reload.</p>
+  <button type="button" id="demo">Load synthetic example</button>
+  <button type="button" id="reset">Clear this case</button>
+  <p id="notice" role="status" aria-live="polite">Start with two documents, paste text, or enter the amounts manually.</p>
+
+  <form id="review-form">
+    <fieldset id="controls">
+      <legend>1. Read your documents locally</legend>
+      <p>Text PDFs and .txt files, up to 10 MB and 30 PDF pages. Scans and photos need OCR, which is not connected yet.</p>
+      <div class="columns">
+        <section>
+          <h2>Good faith estimate</h2>
+          <label for="estimate-file">Choose estimate</label>
+          <input id="estimate-file" type="file" accept=".pdf,.txt">
+          <label for="estimate-text">Estimate text — stays in your browser</label>
+          <textarea id="estimate-text" rows="8" maxlength="100000" spellcheck="false"></textarea>
+          <button type="button" data-suggest="estimate">Find a labeled total</button>
+          <p id="estimate-evidence" class="note"></p>
+        </section>
+        <section>
+          <h2>Medical bill</h2>
+          <label for="bill-file">Choose bill</label>
+          <input id="bill-file" type="file" accept=".pdf,.txt">
+          <label for="bill-text">Bill text — stays in your browser</label>
+          <textarea id="bill-text" rows="8" maxlength="100000" spellcheck="false"></textarea>
+          <button type="button" data-suggest="bill">Find a labeled total</button>
+          <p id="bill-evidence" class="note"></p>
+        </section>
+      </div>
+
+      <h2>2. Confirm the facts</h2>
+      <p>Total detection is a simple local helper. Check the amounts against your documents.</p>
+      <div class="columns">
+        <div><label for="estimate-amount">Estimated amount (USD)</label><input id="estimate-amount" required inputmode="decimal" pattern="[0-9]{1,8}(\.[0-9]{1,2})?" placeholder="900.00" autocomplete="off"></div>
+        <div><label for="bill-amount">Billed amount (USD)</label><input id="bill-amount" required inputmode="decimal" pattern="[0-9]{1,8}(\.[0-9]{1,2})?" placeholder="1650.00" autocomplete="off"></div>
+      </div>
+      <label for="payment-type">Did you use insurance for this care?</label>
+      <select id="payment-type"><option value="unknown">Not sure</option><option value="self_pay">No — self-pay / uninsured</option><option value="insurance">Yes — insurance</option></select>
+      <label for="same-provider">Do both amounts belong to the same provider or facility?</label>
+      <select id="same-provider"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select>
+      <label for="estimate-received">Did you receive a written good faith estimate before care?</label>
+      <select id="estimate-received"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select>
+      <label for="within-window">Is the date on your initial bill within the last 120 days?</label>
+      <select id="within-window"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select>
+
+      <h2>3. Review what leaves your browser</h2>
+      <pre id="payload"></pre>
+      <label class="check"><input type="checkbox" id="confirmed" required> I checked the amounts and the data above.</label>
+      <button id="analyze" type="submit">Compare amounts</button>
+    </fieldset>
+  </form>
+
+  <section id="result" hidden aria-labelledby="result-title">
+    <h2 id="result-title" tabindex="-1"></h2>
+    <p id="difference"></p>
+    <p id="explanation"></p>
+    <ol id="next-steps"></ol>
+    <p id="limitation" class="note"></p>
+    <a id="source" target="_blank" rel="noopener noreferrer">Check the CMS requirements</a>
+    <h3>Draft request</h3>
+    <p>This is a request for an explanation, not a submitted complaint. Add your details after downloading.</p>
+    <pre id="letter"></pre>
+    <button type="button" id="download">Download draft (.txt)</button>
+    <button type="button" id="print">Print / save as PDF</button>
+  </section>
+</main>
+</body>
+</html>
