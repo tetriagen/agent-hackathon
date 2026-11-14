@@ -56,13 +56,6 @@ class MedicalOrbit extends HTMLElement {
     glow.addColorStop(0,'#38506b'); glow.addColorStop(1,'#101e31');
     c.fillStyle=glow;c.fillRect(-w/scale,-h/scale,w*2/scale,h*2/scale);
     const poly = (pts, color) => {c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=color;c.fill();};
-    // Raised blue glass platform.
-    c.shadowColor='#0009';c.shadowBlur=35;c.shadowOffsetY=24;
-    poly([[-175,58],[0,-25],[175,58],[175,81],[0,169],[-175,81]],'#b7c8d7');
-    c.shadowBlur=0;c.shadowOffsetY=0;
-    poly([[-175,58],[0,-30],[175,58],[0,146]],'#dbe8ed');
-    poly([[-152,54],[0,-20],[152,54],[0,128]],'#11283f');
-    poly([[-132,54],[0,-9],[132,54],[0,116]],'#253f5a');
     c.save();c.rotate(-.23);c.beginPath();c.ellipse(0,9,267,115,0,0,Math.PI*2);
     c.shadowColor='#ffbb90';c.shadowBlur=15;c.strokeStyle='#eaa68099';c.lineWidth=2;c.stroke();
     c.beginPath();c.ellipse(0,9,276,121,0,0,Math.PI*2);c.strokeStyle='#ffcf9c44';c.lineWidth=1;c.stroke();c.restore();
