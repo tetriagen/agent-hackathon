@@ -3,7 +3,7 @@
 Plain browser UI + FastAPI. The original Streamlit app and agent remain available.
 Local mode needs no API key and makes no remote AI calls. Local Tesseract OCR
 recognizes English scans. Optional AI mode sends the original selected PDF to
-OpenAI only after explicit consent and a separate button click.
+the configured provider only after explicit consent and a separate button click.
 
 ## Run
 
@@ -99,7 +99,7 @@ The interface is intentionally minimal so it can be redesigned independently of 
 
 ## Verification of this scaffold
 
-- Python: 53 tests passed, including the original agent tests and AI boundary tests.
+- Python: 57 tests passed, including the original agent tests and AI boundary tests.
 - JavaScript: 8 parser/export tests passed.
 - Ruff check and format check passed for changed Python code.
 - Chromium: synthetic example, changed amounts, missing answers, network failure,
@@ -115,23 +115,32 @@ The interface is intentionally minimal so it can be redesigned independently of 
 - See [PDF test results](PDF-TEST-RESULTS.json) for extracted amounts and limitations.
 
 
-## Optional OpenAI extraction
+## Optional Gemini or OpenAI extraction
 
-The server reads `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-4.1-mini`), and
-`CLEARBILL_AI_MAX_REQUESTS` (default 20) from environment variables or the local
+Use `AI_PROVIDER=gemini` and `GEMINI_API_KEY` to select Gemini. The default Gemini
+model is `gemini-3.5-flash-lite`; override with `GEMINI_MODEL`. The local demo is
+configured this way. Requests cap output at 2500 tokens and use the model's default
+minimal thinking. No automatic retries or fallback to a larger model/provider.
+
+Alternatively use `AI_PROVIDER=openai`, `OPENAI_API_KEY` and `OPENAI_MODEL`
+(default `gpt-4.1-mini`). If AI_PROVIDER is omitted the legacy default is OpenAI.
+`CLEARBILL_AI_MAX_REQUESTS` defaults to 20. Environment variables override the local
 ignored `.env`. Keys never go to the browser. In Docker, pass environment variables;
 the image does not copy `.env`.
 
 Select a PDF, check the separate data-sharing consent, and click **Compare with AI**.
 This sends the **original unredacted PDF**, including images and any personal data,
-to `/api/extract` and then OpenAI. Editing the local text does not redact the PDF.
+to `/api/extract` and then the provider named in the consent label. The server
+rejects consent for a different provider, requiring a reload and renewed consent. Editing the local text does not redact the PDF.
 The new boundary is deliberately visible; this is not zero-knowledge processing.
 
-The Responses API returns a structured extraction with four nullable amounts,
+Both adapters return a structured extraction with four nullable amounts,
 source excerpts, PDF pages, document type, and warnings. AI values do not overwrite
 confirmed facts or make legal decisions. Excerpts and figures still need visual
-verification. API response storage is disabled with `store=False`; that is not a
-promise of zero provider retention. No Files API objects are created.
+verification. For OpenAI, response storage is disabled with `store=False`; that is not a
+promise of zero provider retention. Both adapters send inline PDFs and create no
+Files API objects. Gemini Free Tier content may be used to improve Google products;
+use public samples or synthetic data for this demo.
 
 The server accepts PDFs up to 10 MB and 30 pages, rejects encrypted PDFs, runs one
 AI call at a time, disables automatic SDK retries and uses a 110-second timeout.
@@ -139,22 +148,22 @@ The per-process attempt cap is bounded at 100 and resets on restart. It is a dem
 limit, not a durable production billing control; multiple workers have separate
 counters. A public deployment needs durable rate/cost limits.
 
-On 2026-11-14 the live request was blocked by HTTP 429
+On 2026-11-14 the OpenAI live request was blocked by HTTP 429
 `credit_balance_exhausted` / `insufficient_quota`. The first PDF was attempted twice
 (the second call identified the precise provider code). No model output was
-obtained; the other four were not sent. No AI accuracy score is available yet.
+obtained; the other four were not sent. No OpenAI accuracy score is available. Gemini results are recorded separately below.
 UI success was checked using an explicitly mocked response, not a live AI result;
 consent, original-PDF transfer, non-overwrite of facts, quota error recovery and
 390/1440px layouts were tested. Existing local functionality remains available.
 
 The five-sample expected values are independently recorded in
-`tests/fixtures/pdf-expected.json`. To run the comparison after activating credits:
+`tests/fixtures/pdf-expected.json`. To run the comparison with the configured provider:
 
 ```bash
 .venv/bin/python -m billing.compare_samples /path/to/billing-examples /path/to/comparison.json
 ```
 
-This command intentionally makes paid calls for five public samples and stops on
+This command intentionally consumes API quota (and may incur charges on a paid tier) for five public samples and stops on
 billing/authentication errors. Local rules read PDF.js/OCR text; AI reads original
 PDFs. Results compare complete pipelines, not identical text inputs. Check source
 excerpts, page references and warnings manually in addition to numeric scores.
@@ -163,3 +172,23 @@ Official API references:
 - https://developers.openai.com/api/docs/guides/file-inputs
 - https://developers.openai.com/api/docs/guides/structured-outputs
 - https://developers.openai.com/api/docs/guides/chatgpt-api-credits
+
+
+## Gemini validation
+
+Five live public-PDF results from `gemini-3.5-flash-lite`: all 9 populated reference
+amounts matched; local rules found 6 and missed 3. Both classified 5/5 documents
+correctly and left 11 non-applicable fields null. Numeric success does not imply
+complete verification: Gemini missed the Jane Jones payment inconsistency and
+Blue Cross multi-claim warning; two excerpts contained only a number.
+See [the reviewed comparison](GEMINI-COMPARISON.md) and
+[original structured responses](GEMINI-COMPARISON.json).
+
+UI: provider disclosure, explicit consent, original PDF payload, unchanged manual
+facts, quota-error recovery and 390/1440px layouts checked with mocked responses
+and synthetic input, without extra model calls. The five-PDF run used live Gemini.
+
+Gemini API references:
+- https://aistudio.google.com/docs/models/gemini-3.5-flash-lite
+- https://aistudio.google.com/docs/document-processing?generate-content=true
+- https://aistudio.google.com/docs/structured-output?generate-content=true

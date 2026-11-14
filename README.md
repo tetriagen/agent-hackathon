@@ -4,10 +4,12 @@
 
 The medical-bill prototype lives in `billing/` + `web/`. It reads PDF/TXT documents and scanned PDFs locally, extracts labeled fields
 using deterministic rules, compares user-confirmed amounts through FastAPI, and
-exports a draft request. Local mode needs no API key. An optional, explicitly consented OpenAI PDF
+exports a draft request. Local mode needs no API key. An optional, explicitly consented Gemini or OpenAI PDF
 extraction mode compares AI fields with local rules.
 
 **[Run ClearBill and see the implementation boundaries](docs/CLEARBILL.md)**
+
+[Gemini Flash-Lite vs local rules: five-PDF results](docs/GEMINI-COMPARISON.md).
 
 The original business-agent template below is preserved separately.
 

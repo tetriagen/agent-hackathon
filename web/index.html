@@ -14,7 +14,8 @@
   <h1>ClearBill</h1>
   <p>Compare a medical bill with your estimate. Prepare your next step.</p>
   <p class="note">Local document rules + OCR · Optional AI comparison</p>
-  <p>Local reading keeps documents in this browser. Comparing amounts sends only the facts shown below. The optional AI button sends the selected original PDF to our server and OpenAI, including any personal information in it. Page contents are cleared on reload.</p>
+  <p>Local reading keeps documents in this browser. Comparing amounts sends only the facts shown below. The optional AI button sends the selected original PDF to our server and <span class="ai-provider">the configured AI provider</span>, including any personal information in it. Page contents are cleared on reload.</p>
+  <p id="ai-privacy" class="note" aria-live="polite"></p>
   <button type="button" id="demo">Load synthetic example</button>
   <button type="button" id="reset">Clear this case</button>
   <p id="notice" role="status" aria-live="polite">Start with two documents, paste text, or enter the amounts manually.</p>
@@ -33,8 +34,8 @@
           <button type="button" data-suggest="estimate">Read document fields</button>
           <p id="estimate-evidence" class="note"></p>
           <div id="estimate-parsed" aria-live="polite"></div>
-          <label class="check"><input id="estimate-ai-consent" type="checkbox"> I agree to send this original PDF to OpenAI for extraction. It is not redacted; edits to the text above do not change the file.</label>
-          <button type="button" data-ai="estimate">Compare with AI</button>
+          <label class="check"><input id="estimate-ai-consent" type="checkbox"><span>I agree to send this original PDF to <span class="ai-provider">the configured AI provider</span> for extraction. It is not redacted; edits to the text above do not change the file.</span></label>
+          <button type="button" data-ai="estimate" disabled>Compare with AI</button>
           <div id="estimate-ai-result" aria-live="polite"></div>
         </section>
         <section>
@@ -46,8 +47,8 @@
           <button type="button" data-suggest="bill">Read document fields</button>
           <p id="bill-evidence" class="note"></p>
           <div id="bill-parsed" aria-live="polite"></div>
-          <label class="check"><input id="bill-ai-consent" type="checkbox"> I agree to send this original PDF to OpenAI for extraction. It is not redacted; edits to the text above do not change the file.</label>
-          <button type="button" data-ai="bill">Compare with AI</button>
+          <label class="check"><input id="bill-ai-consent" type="checkbox"><span>I agree to send this original PDF to <span class="ai-provider">the configured AI provider</span> for extraction. It is not redacted; edits to the text above do not change the file.</span></label>
+          <button type="button" data-ai="bill" disabled>Compare with AI</button>
           <div id="bill-ai-result" aria-live="polite"></div>
         </section>
       </div>

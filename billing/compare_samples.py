@@ -1,7 +1,7 @@
-"""Explicit paid sample run: python -m billing.compare_samples PDF_DIR OUTPUT_JSON.
+"""Explicit remote sample run: python -m billing.compare_samples PDF_DIR OUTPUT_JSON.
 
 Reads only the five public sample filenames in pdf-expected.json. Does not retry
-failed paid calls, stops on billing/auth errors, and saves after every response.
+failed model calls, stops on billing/auth errors, and saves after every response.
 Never includes an API key, raw PDF, or provider error body in the report.
 """
 
@@ -44,6 +44,9 @@ def main():
         "samples": [],
     }
     with httpx.Client(timeout=125, trust_env=False) as client:
+        health = client.get(args.server.rstrip("/") + "/api/health").json()
+        provider = health["ai_provider"]
+        report["provider"] = provider
         for sample in expected["samples"]:
             name = sample["file"]
             response = client.post(
@@ -52,6 +55,7 @@ def main():
                 headers={
                     "Content-Type": "application/pdf",
                     "X-AI-Consent": "send-original-pdf",
+                    "X-AI-Provider": provider,
                 },
             )
             row = {

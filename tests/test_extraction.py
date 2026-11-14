@@ -43,6 +43,7 @@ def post(data=None, **headers):
         headers={
             "Content-Type": "application/pdf",
             "X-AI-Consent": "send-original-pdf",
+            "X-AI-Provider": "openai",
             **headers,
         },
     )
@@ -149,3 +150,78 @@ def test_sdk_receives_original_pdf_and_no_storage_or_tools(monkeypatch):
     )
     assert captured["client"]["max_retries"] == 0
     assert response["requires_verification"] is True
+
+
+def test_provider_change_requires_new_consent(monkeypatch):
+    monkeypatch.setattr(
+        api,
+        "settings",
+        lambda: {"AI_PROVIDER": "gemini", "GEMINI_API_KEY": "test-only"},
+    )
+    assert post().status_code == 409
+
+
+@pytest.mark.parametrize(
+    "status,finish", [(200, "STOP"), (200, "MAX_TOKENS"), (429, None)]
+)
+def test_gemini_contract_and_safe_failures(monkeypatch, status, finish):
+    import json
+
+    empty = {"value": None, "evidence": "", "page": None}
+    result = {
+        "type": "unknown",
+        "fields": {
+            name: empty
+            for name in [
+                "billed_total",
+                "estimated_total",
+                "patient_responsibility",
+                "plan_paid",
+            ]
+        },
+        "warnings": [],
+    }
+    captured = {}
+
+    def handler(request):
+        captured["request"] = request
+        body = (
+            {
+                "candidates": [
+                    {
+                        "finishReason": finish,
+                        "content": {"parts": [{"text": json.dumps(result)}]},
+                    }
+                ],
+                "modelVersion": "gemini-test",
+                "usageMetadata": {"totalTokenCount": 10},
+            }
+            if status == 200
+            else {"error": {"message": "PRIVATE_PROVIDER_BODY"}}
+        )
+        return httpx.Response(status, json=body)
+
+    original = httpx.AsyncClient
+    monkeypatch.setattr(
+        extraction.httpx,
+        "AsyncClient",
+        lambda **kwargs: original(transport=httpx.MockTransport(handler), **kwargs),
+    )
+    config = {"GEMINI_API_KEY": "test-only", "GEMINI_MODEL": "gemini-3.5-flash-lite"}
+    if status == 200 and finish == "STOP":
+        response = asyncio.run(extraction.extract_gemini(b"%PDF-TEST", 1, config))
+        assert response["provider"] == "gemini"
+        assert response["requires_verification"] is True
+    else:
+        with pytest.raises((ValueError, extraction.RemoteExtractionError)) as error:
+            asyncio.run(extraction.extract_gemini(b"%PDF-TEST", 1, config))
+        assert "PRIVATE_PROVIDER_BODY" not in str(error.value)
+    request = captured["request"]
+    assert "key=" not in str(request.url)
+    assert request.headers["x-goog-api-key"] == "test-only"
+    payload = json.loads(request.content)
+    assert (
+        payload["contents"][0]["parts"][0]["inlineData"]["mimeType"]
+        == "application/pdf"
+    )
+    assert "tools" not in payload

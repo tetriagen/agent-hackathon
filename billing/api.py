@@ -9,7 +9,14 @@ from fastapi.staticfiles import StaticFiles
 from openai import APIError, AuthenticationError, RateLimitError
 from pydantic import ValidationError
 
-from billing.extraction import extract_pdf, settings, validate_pdf
+from billing.extraction import (
+    RemoteExtractionError,
+    configured,
+    extract_pdf,
+    selected_provider,
+    settings,
+    validate_pdf,
+)
 from billing.models import ReviewRequest, ReviewResult
 from billing.rules import review_bill
 
@@ -39,7 +46,8 @@ def health():
     return {
         "status": "ok",
         "mode": "confirmed_facts",
-        "ai_enabled": bool(settings()["OPENAI_API_KEY"]),
+        "ai_provider": selected_provider(settings()),
+        "ai_enabled": configured(settings()),
     }
 
 
@@ -47,11 +55,17 @@ def health():
 async def extract(request: Request):
     global ai_requests
     if request.headers.get("x-ai-consent") != "send-original-pdf":
-        raise HTTPException(400, "Confirm sending the original PDF to OpenAI.")
+        raise HTTPException(
+            400, "Confirm sending the original PDF to the selected AI provider."
+        )
     if request.headers.get("content-type") != "application/pdf":
         raise HTTPException(415, "Choose a PDF file.")
     config = settings()
-    if not config["OPENAI_API_KEY"]:
+    if request.headers.get("x-ai-provider") != selected_provider(config):
+        raise HTTPException(
+            409, "AI provider changed. Reload the page and review data-sharing consent."
+        )
+    if not configured(config):
         raise HTTPException(
             503, "AI is not configured on this server. Local rules still work."
         )
@@ -81,6 +95,8 @@ async def extract(request: Request):
         ai_requests += 1
         try:
             return await extract_pdf(bytes(body), pages)
+        except RemoteExtractionError as error:
+            raise HTTPException(error.status, str(error)) from None
         except AuthenticationError:
             raise HTTPException(
                 503, "The server API key was rejected. Check its configuration."

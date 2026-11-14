@@ -1,0 +1,546 @@
+{
+  "provider": "gemini",
+  "configured_model": "gemini-3.5-flash-lite",
+  "method": "Original PDFs via Gemini versus local PDF.js/Tesseract text and rules; same predeclared expected values. HealthComp reuses the successful validation call with the same prompt/schema/model and 2500-token output cap.",
+  "status": "completed",
+  "samples": [
+    {
+      "file": "blue-cross-nc-eob.pdf",
+      "http_status": 200,
+      "expected_type": "eob",
+      "local": {
+        "billed_total": {
+          "expected": "989.00",
+          "actual": "989.00",
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "159.00",
+          "actual": "159.00",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "561.00",
+          "actual": "561.00",
+          "correct": true
+        }
+      },
+      "local_type_correct": true,
+      "ai_result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "989.00",
+              "evidence": "Total Amount Provider(s) Charged: $989.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "159.00",
+              "evidence": "What Provider(s) May Bill You: $159.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "561.00",
+              "evidence": "paid $561.00 towards the claims in this summary",
+              "page": 1
+            }
+          },
+          "warnings": []
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 3496,
+          "candidatesTokenCount": 216,
+          "totalTokenCount": 3712,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 376
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 3120
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.4,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": "989.00",
+          "actual": "989.00",
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "159.00",
+          "actual": "159.00",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "561.00",
+          "actual": "561.00",
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "pdf_sha256": "8f9366e3f88f9693855dc569cc93dbf4b715bae5667441d69b3250b7a7b6931a"
+    },
+    {
+      "file": "healthcomp-eob.pdf",
+      "http_status": 200,
+      "expected_type": "eob",
+      "local": {
+        "billed_total": {
+          "expected": "60.00",
+          "actual": null,
+          "correct": false
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "20.00",
+          "actual": "20.00",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "21.77",
+          "actual": "21.77",
+          "correct": true
+        }
+      },
+      "local_type_correct": true,
+      "ai_result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "60.00",
+              "evidence": "60.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "20.00",
+              "evidence": "PATIENT RESPONSIBILITY 20.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "21.77",
+              "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+              "page": 1
+            }
+          },
+          "warnings": []
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 1416,
+          "candidatesTokenCount": 192,
+          "totalTokenCount": 1608,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 376
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1040
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.27,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": "60.00",
+          "actual": "60.00",
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "20.00",
+          "actual": "20.00",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "21.77",
+          "actual": "21.77",
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "pdf_sha256": "28ed90d67937e1bedd88a10e8abeb0951f9a90b17a81deea05719c1ab19f04bf"
+    },
+    {
+      "file": "jane-jones-eob.pdf",
+      "http_status": 200,
+      "expected_type": "eob",
+      "local": {
+        "billed_total": {
+          "expected": "92.25",
+          "actual": null,
+          "correct": false
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "10.77",
+          "actual": null,
+          "correct": false
+        },
+        "plan_paid": {
+          "expected": "43.06",
+          "actual": "43.06",
+          "correct": true
+        }
+      },
+      "local_type_correct": true,
+      "ai_result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "92.25",
+              "evidence": "92.25",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "10.77",
+              "evidence": "PATIENT RESPONSIBILITY 10.77",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "43.06",
+              "evidence": "TOTAL PAYMENT AMOUNT 43.06",
+              "page": 1
+            }
+          },
+          "warnings": []
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 1936,
+          "candidatesTokenCount": 192,
+          "totalTokenCount": 2128,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1560
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 376
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.2,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": "92.25",
+          "actual": "92.25",
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "10.77",
+          "actual": "10.77",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "43.06",
+          "actual": "43.06",
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "pdf_sha256": "45810eab3f48f56bca8997163a22d60d6a4959ed02e0d7f67ebee826a8eda71a"
+    },
+    {
+      "file": "cms-good-faith-estimate-blank.pdf",
+      "http_status": 200,
+      "expected_type": "good_faith_estimate",
+      "local": {
+        "billed_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      },
+      "local_type_correct": true,
+      "ai_result": {
+        "extraction": {
+          "type": "good_faith_estimate",
+          "fields": {
+            "billed_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "plan_paid": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            }
+          },
+          "warnings": [
+            "The provided document is a blank template Good Faith Estimate form containing no specific patient or financial amounts."
+          ]
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 6616,
+          "candidatesTokenCount": 175,
+          "totalTokenCount": 6791,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 6240
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 376
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 3.72,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "pdf_sha256": "9acd311e99fa188dedbf6a0578065a5eed7597cbbe4ec90023a04a967e27624b"
+    },
+    {
+      "file": "cms-estimate-vs-bill-examples.pdf",
+      "http_status": 200,
+      "expected_type": "educational_example",
+      "local": {
+        "billed_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      },
+      "local_type_correct": true,
+      "ai_result": {
+        "extraction": {
+          "type": "educational_example",
+          "fields": {
+            "billed_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "plan_paid": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            }
+          },
+          "warnings": [
+            "The document contains multiple educational worked scenarios and is not a single bill or claim."
+          ]
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 1416,
+          "candidatesTokenCount": 170,
+          "totalTokenCount": 1586,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 376
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1040
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 3.07,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "pdf_sha256": "7d6385232f56048ac3440a3b6f04793f7a6f44d762a7718fed7f068040fb1478"
+    }
+  ],
+  "prompt_sha256": "2c6f37656defbf1ab9d65cb860096d07594a275cd0dd6df7e54d49821c0820af",
+  "manual_review": {
+    "numeric_amounts": {
+      "gemini_correct": 9,
+      "gemini_missing": 0,
+      "gemini_wrong": 0,
+      "local_correct": 6,
+      "local_missing": 3,
+      "local_wrong": 0
+    },
+    "null_fields_correct": {
+      "gemini": 11,
+      "local": 11
+    },
+    "document_types_correct": {
+      "gemini": 5,
+      "local": 5
+    },
+    "source_pages_correct": 9,
+    "weak_evidence": [
+      "healthcomp-eob.pdf billed_total: excerpt is only 60.00, without column label",
+      "jane-jones-eob.pdf billed_total: excerpt is only 92.25, without column label"
+    ],
+    "missed_warnings": [
+      "Jane Jones: total payment 43.06 versus provider payment distribution 53.83, not flagged by Gemini or local rules.",
+      "Blue Cross: summary combines 3 claims, not flagged by Gemini; local parser warned correctly."
+    ],
+    "scope": "One run on five public examples; no general accuracy or legal correctness claim."
+  },
+  "usage_successful_only": {
+    "promptTokenCount": 14880,
+    "candidatesTokenCount": 945,
+    "totalTokenCount": 15825
+  }
+}

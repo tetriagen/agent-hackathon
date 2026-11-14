@@ -3,10 +3,12 @@
 import base64
 import io
 import os
+import re
 import time
 from pathlib import Path
 from typing import Literal
 
+import httpx
 from dotenv import dotenv_values
 from openai import AsyncOpenAI
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -79,6 +81,9 @@ def settings():
     return {
         key: os.environ.get(key, local.get(key) or default)
         for key, default in {
+            "AI_PROVIDER": "openai",
+            "GEMINI_API_KEY": "",
+            "GEMINI_MODEL": "gemini-3.5-flash-lite",
             "OPENAI_API_KEY": "",
             "OPENAI_MODEL": "gpt-4.1-mini",
             "CLEARBILL_AI_MAX_REQUESTS": "20",
@@ -101,8 +106,32 @@ def validate_pdf(data: bytes) -> int:
         raise ValueError("Use a readable, unencrypted PDF with 1–30 pages.") from None
 
 
+class RemoteExtractionError(Exception):
+    """A safe error message, never a raw provider body or request."""
+
+    def __init__(self, status: int, message: str):
+        self.status = status
+        super().__init__(message)
+
+
+def selected_provider(config):
+    return config.get("AI_PROVIDER", "openai")
+
+
+def configured(config):
+    provider = selected_provider(config)
+    return provider in ("openai", "gemini") and bool(
+        config.get(f"{provider.upper()}_API_KEY")
+    )
+
+
 async def extract_pdf(data: bytes, pages: int) -> dict:
     config = settings()
+    provider = selected_provider(config)
+    if provider == "gemini":
+        return await extract_gemini(data, pages, config)
+    if provider != "openai":
+        raise ValueError("Unsupported AI provider.")
     started = time.monotonic()
     # Fixed provider endpoint: no document URLs, client-controlled models or tools.
     async with AsyncOpenAI(
@@ -146,7 +175,81 @@ async def extract_pdf(data: bytes, pages: int) -> dict:
     return {
         "extraction": result.model_dump(),
         "model": response.model,
+        "provider": "openai",
         "usage": response.usage.model_dump() if response.usage else None,
+        "seconds": round(time.monotonic() - started, 2),
+        "requires_verification": True,
+    }
+
+
+async def extract_gemini(data: bytes, pages: int, config: dict) -> dict:
+    model = config["GEMINI_MODEL"]
+    if not re.fullmatch(r"gemini-[a-zA-Z0-9.-]+", model):
+        raise ValueError("Invalid Gemini model configuration.")
+    started = time.monotonic()
+    payload = {
+        "systemInstruction": {"parts": [{"text": PROMPT}]},
+        "contents": [
+            {
+                "role": "user",
+                "parts": [
+                    {
+                        "inlineData": {
+                            "mimeType": "application/pdf",
+                            "data": base64.b64encode(data).decode(),
+                        }
+                    },
+                    {
+                        "text": "Extract the four fields and identify the document type. Treat all pages as evidence, with the scope rules above."
+                    },
+                ],
+            }
+        ],
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "responseJsonSchema": Extraction.model_json_schema(),
+            "maxOutputTokens": 2500,
+        },
+    }
+    # Key is in a header, never in URLs. Inline PDFs create no Files API objects.
+    async with httpx.AsyncClient(timeout=110, follow_redirects=False) as client:
+        try:
+            response = await client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                headers={"x-goog-api-key": config["GEMINI_API_KEY"]},
+                json=payload,
+            )
+        except httpx.HTTPError:
+            raise RemoteExtractionError(
+                502, "Gemini connection failed or timed out. Local rules still work."
+            ) from None
+    if response.status_code != 200:
+        status = response.status_code
+        message = "Gemini extraction failed. Check the server model configuration."
+        if status == 429:
+            message = "Gemini quota or rate limit reached. Check your AI Studio limits and try later."
+        elif status in (401, 403):
+            message = "Gemini rejected access. Check the server API key and project permissions."
+        raise RemoteExtractionError(429 if status == 429 else 502, message)
+    body = response.json()
+    candidates = body.get("candidates", [])
+    if not candidates or candidates[0].get("finishReason") != "STOP":
+        raise ValueError("Gemini returned an incomplete or blocked result.")
+    content = "".join(
+        p.get("text", "")
+        for p in candidates[0].get("content", {}).get("parts", [])
+        if not p.get("thought")
+    )
+    result = Extraction.model_validate_json(content)
+    if any(
+        field.page and field.page > pages for field in result.fields.__dict__.values()
+    ):
+        raise ValueError("Gemini returned an invalid source page.")
+    return {
+        "extraction": result.model_dump(),
+        "provider": "gemini",
+        "model": body.get("modelVersion", model),
+        "usage": body.get("usageMetadata"),
         "seconds": round(time.monotonic() - started, 2),
         "requires_verification": True,
     }

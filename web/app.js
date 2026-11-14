@@ -8,6 +8,8 @@ let generation = 0;
 let controller = null;
 let draft = '';
 const ocrUsed = { estimate: false, bill: false };
+let aiProvider = null;
+let aiProviderLabel = 'the configured AI provider';
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 function facts() {
@@ -194,10 +196,11 @@ invalidate();
 
 // Explicitly separate remote PDF extraction from local reading and legal rules.
 document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener('click', async () => {
+  if (!aiProvider) { notice('AI is not configured. Local reading still works.', true); return; }
   const kind = button.dataset.ai;
   const file = $(`${kind}-file`).files[0];
   if (!file || !/\.pdf$/i.test(file.name)) { notice('Select an original PDF before using AI. Pasted text is not sent.', true); return; }
-  if (!$(`${kind}-ai-consent`).checked) { notice('Confirm sending this original PDF to OpenAI first.', true); $(`${kind}-ai-consent`).focus(); return; }
+  if (!$(`${kind}-ai-consent`).checked) { notice(`Confirm sending this original PDF to ${aiProviderLabel} first.`, true); $(`${kind}-ai-consent`).focus(); return; }
   if (file.size > 10 * 1024 * 1024) { notice('Choose a PDF up to 10 MB.', true); return; }
   if (reading || controller) return;
   const box = $(`${kind}-ai-result`);
@@ -207,9 +210,9 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
   $('controls').disabled = true; $('demo').disabled = true; $('reset').disabled = true;
   const abort = new AbortController();
   const timeout = setTimeout(() => abort.abort(), 120000);
-  notice('Sending the original PDF to OpenAI and extracting fields…');
+  notice(`Sending the original PDF to ${aiProviderLabel} and extracting fields…`);
   try {
-    const response = await fetch('/api/extract', {method:'POST', headers:{'Content-Type':'application/pdf','X-AI-Consent':'send-original-pdf'}, body:file, signal:abort.signal});
+    const response = await fetch('/api/extract', {method:'POST', headers:{'Content-Type':'application/pdf','X-AI-Consent':'send-original-pdf','X-AI-Provider':aiProvider}, body:file, signal:abort.signal});
     const data = await response.json();
     if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'AI extraction failed.');
     const result = data.extraction;
@@ -228,3 +231,24 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
   } catch (error) { notice(error.name === 'AbortError' ? 'AI request timed out. Local rules still work.' : error.message, true); }
   finally { clearTimeout(timeout); reading--; $('controls').disabled=false; $('demo').disabled=false; $('reset').disabled=false; }
 }));
+
+
+async function configureAI() {
+  try {
+    const response = await fetch('/api/health');
+    if (!response.ok) return;
+    const health = await response.json();
+    if (!health.ai_enabled || !['openai', 'gemini'].includes(health.ai_provider)) {
+      $('ai-privacy').textContent = 'AI is unavailable on this server. Local document reading still works.';
+      return;
+    }
+    aiProvider = health.ai_provider;
+    aiProviderLabel = aiProvider === 'gemini' ? 'Gemini (Google)' : 'OpenAI';
+    document.querySelectorAll('.ai-provider').forEach(el => {el.textContent = aiProviderLabel;});
+    $('ai-privacy').textContent = aiProvider === 'gemini'
+      ? 'Gemini Free Tier may use submitted data to improve Google products. Use public samples or synthetic documents for this demo.'
+      : 'AI sends the original unredacted PDF to OpenAI. Verify the extracted values before using them.';
+    document.querySelectorAll('[data-ai]').forEach(button => {button.disabled=false;});
+  } catch { $('ai-privacy').textContent = 'Could not check AI availability. Local reading still works.'; }
+}
+configureAI();
