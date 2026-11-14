@@ -47,6 +47,8 @@ docker run --rm -p 8000:8000 clearbill
 - `billing/models.py`: strict schema, USD decimal strings, unknown answers allowed.
 - `billing/rules.py`: Decimal arithmetic and preliminary screening, no LLM verdict.
 - `billing/consistency.py`: deterministic reconciliation of related EOB payment sections.
+- `billing/duplicates.py`: exact matching of comparable original service rows.
+- `billing/letters.py`: server-generated combined clarification letter, no extra AI call.
 - `billing/api.py`: health/review endpoints and same-origin static assets.
 - `tests/test_billing.py`: money boundaries, missing facts, API validation/privacy.
 - `tests/billing-client.test.mjs`: local extraction helpers and export content.
@@ -80,7 +82,7 @@ still need review before real use; this is not a HIPAA compliance or zero-knowle
 
 ## Not implemented yet
 
-Standalone image uploads; service-line matching; automated PII
+Standalone image uploads; broad/fuzzy or cross-claim service-line matching; automated PII
 redaction for sending free text; complete legal eligibility checks; saved cases;
 appeals submission; payments; insurance coverage or comprehensive EOB correctness analysis; Medicare lookup.
 No legal finding or savings amount is inferred. The $400 screen does not validate
@@ -90,7 +92,7 @@ The exported letter requests an itemized explanation rather than asserting a vio
 ## Next implementation slice
 
 1. Expand supported labels/layouts with representative tests; improve OCR table handling.
-2. Keep user confirmation before applying rules; add service-line matching.
+2. Expand exact service-line matching to reviewed broader cases; preserve manual verification.
 3. Before processing sensitive real documents with AI, implement local redaction
    and validate its limits. The current optional mode explicitly sends the original
    unredacted PDF; never route uploads through the legacy agent loop.
@@ -104,7 +106,7 @@ The interface is intentionally minimal so it can be redesigned independently of 
 
 ## Verification of this scaffold
 
-- Python: 74 tests passed, including the original agent tests, AI boundaries and payment reconciliation.
+- Python: 119 tests passed, including original agent tests, AI boundaries, payment reconciliation, duplicate services and letters.
 - JavaScript: 12 parser/export/insurance-letter tests passed.
 - Ruff check and format check passed for changed Python code.
 - Chromium: synthetic example, changed amounts, missing answers, network failure,

@@ -1,0 +1,1149 @@
+{
+  "date": "2026-11-15",
+  "model": "gemini-3.5-flash-lite",
+  "current_prompt_sha256": "3373fe2e44acddfe427a213c68f7ef35b35297e3d0d4b6551e1b96b75dce45fd",
+  "method": "Nine live responses: three synthetic PDFs, five previous public PDFs, one targeted HealthComp recheck. JSON results replayed through final deterministic validation, including null-source text cleanup; no additional AI calls for replay. Initial eight responses precede the final blank-payee instruction; recheck includes it. These are not nine independent accuracy cases.",
+  "setup": "Four earlier live calls (one initial duplicate probe and three-case run) exposed incorrect model judgments about separate services. Those responses are not selected as successful validation; schema redesigned to extract concrete service context instead. Their usage is not included below.",
+  "validation_usage": {
+    "input": 27474,
+    "output": 4597,
+    "total": 32071,
+    "seconds": 22.93
+  },
+  "samples": [
+    {
+      "sample": "duplicate.pdf",
+      "kind": "synthetic",
+      "http_status": 200,
+      "sha256": "8c197d39b231ed0e7fcf6fede711d7910925252c1b450e2d3a659022d86fc3c0",
+      "result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "150.00",
+              "evidence": "Total billed charges: $150.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "50.00",
+              "evidence": "Patient responsibility: $50.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "100.00",
+              "evidence": "Plan paid: $100.00",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [],
+          "service_lines": [
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 1,
+              "service_date": "2026-10-20",
+              "code": "97110",
+              "modifiers": "",
+              "units": "1",
+              "charge": "75.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+            },
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 2,
+              "service_date": "2026-10-20",
+              "code": "97110",
+              "modifiers": "",
+              "units": "1",
+              "charge": "75.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+            }
+          ],
+          "service_lines_complete": true
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "No comparable total-payment and payment-distribution sections were extracted. This does not mean the document is correct.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "review_needed",
+          "coverage": "complete",
+          "rows_extracted": 2,
+          "rows_checked": 2,
+          "extraction_complete": true,
+          "findings": [
+            {
+              "rule": "possible_duplicate_service",
+              "status": "possible_duplicate",
+              "scope": "case1",
+              "service_date": "2026-10-20",
+              "code": "97110",
+              "modifiers": [],
+              "units": "1",
+              "charge_per_row": "75.00",
+              "service_context": "",
+              "sources": [
+                {
+                  "page": 1,
+                  "row": 1,
+                  "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+                },
+                {
+                  "page": 1,
+                  "row": 2,
+                  "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+                }
+              ],
+              "explanation": "Distinct printed rows have the same extracted case, service date, code, modifiers, quantity, charge and shown service context. Ask whether they represent separate services or duplicate billing. Repeated services can be legitimate; no refund or savings is established."
+            }
+          ],
+          "skipped": [],
+          "summary": "Possible duplicate groups: 1. Rows eligible for matching: 2.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": {
+          "recipient": "insurance_claims",
+          "subject": "Request to clarify possibly repeated service charges",
+          "body": "To: [Insurance company / claims department]\nFrom: [Your name]\nMember/account ID: [Your member or account ID]\nClaim/reference(s): [Reference for each group below]\nDate: [Today's date]\n\nSubject: Request to clarify possibly repeated service charges\n\nDear Claims Department,\n\nI am requesting a review of the following items in my Explanation of Benefits (EOB):\n\nPossible repeated service group 1:\n- Service date: 2026-10-20\n- Service code: 97110\n- Modifiers: none shown\n- Quantity per row: 1\n- Charge per row: $75.00\n- Rows to review: PDF page 1, service row 1; PDF page 1, service row 2\nThese rows appear to have matching service details. Please confirm whether each represents a separately provided service and explain any differences in encounter, time, site, specimen, quantity or coding. If a charge was duplicated, please correct it and explain any effect on my responsibility.\n\nI am asking for clarification, not assuming these items are billing errors or that a refund is due. I can provide the document and referenced pages. Please provide a written explanation, any corrected document, a reference number for this inquiry, and the next steps.\n\nThank you,\n[Your name]\n[Preferred contact details]\n",
+          "requires_review": true,
+          "sent": false
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 1832,
+          "candidatesTokenCount": 571,
+          "totalTokenCount": 2403,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 520
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 1312
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.34,
+        "requires_verification": true
+      }
+    },
+    {
+      "sample": "repeat.pdf",
+      "kind": "synthetic",
+      "http_status": 200,
+      "sha256": "c90e7921da7733f1eab7f5ee3490c622d168e0986c43194b50dcfe5d164d4c49",
+      "result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "150.00",
+              "evidence": "Total billed charges: $150.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "50.00",
+              "evidence": "Patient responsibility: $50.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "100.00",
+              "evidence": "Plan paid: $100.00",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [],
+          "service_lines": [
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 1,
+              "service_date": "2026-10-20",
+              "code": "97110",
+              "modifiers": "",
+              "units": "1",
+              "charge": "75.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+            },
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 2,
+              "service_date": "2026-10-20",
+              "code": "97110",
+              "modifiers": "76",
+              "units": "1",
+              "charge": "75.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "Second row: repeat service at a separate encounter.",
+              "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: 76 | Units: 1 | Charged: 75.00"
+            }
+          ],
+          "service_lines_complete": true
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "No comparable total-payment and payment-distribution sections were extracted. This does not mean the document is correct.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "not_checked",
+          "coverage": "partial",
+          "rows_extracted": 2,
+          "rows_checked": 1,
+          "extraction_complete": true,
+          "findings": [],
+          "skipped": [
+            {
+              "page": 1,
+              "row": 2,
+              "reason": "A repeat/distinct-service modifier is present."
+            }
+          ],
+          "summary": "Possible duplicate groups: 0. Rows eligible for matching: 1.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": null,
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 1832,
+          "candidatesTokenCount": 586,
+          "totalTokenCount": 2418,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 520
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 1312
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.84,
+        "requires_verification": true
+      }
+    },
+    {
+      "sample": "incomplete.pdf",
+      "kind": "synthetic",
+      "http_status": 200,
+      "sha256": "d8be1d5798339da3e94d3068fffa4d87db1f92531ee21bd036898e98bcf8936b",
+      "result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "150.00",
+              "evidence": "Total billed charges: $150.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "50.00",
+              "evidence": "Patient responsibility: $50.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "100.00",
+              "evidence": "Plan paid: $100.00",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [],
+          "service_lines": [
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 1,
+              "service_date": "2026-10-20",
+              "code": "97110",
+              "modifiers": "none",
+              "units": null,
+              "charge": "75.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: not shown | Charged: 75.00"
+            },
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 2,
+              "service_date": "2026-10-20",
+              "code": "97110",
+              "modifiers": "none",
+              "units": null,
+              "charge": "75.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: not shown | Charged: 75.00"
+            }
+          ],
+          "service_lines_complete": true
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "No comparable total-payment and payment-distribution sections were extracted. This does not mean the document is correct.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "not_checked",
+          "coverage": "not_checked",
+          "rows_extracted": 2,
+          "rows_checked": 0,
+          "extraction_complete": true,
+          "findings": [],
+          "skipped": [
+            {
+              "page": 1,
+              "row": 1,
+              "reason": "Modifiers, quantity, service context or line charge are missing or unreadable."
+            },
+            {
+              "page": 1,
+              "row": 2,
+              "reason": "Modifiers, quantity, service context or line charge are missing or unreadable."
+            }
+          ],
+          "summary": "Possible duplicate groups: 0. Rows eligible for matching: 0.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": null,
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 1832,
+          "candidatesTokenCount": 573,
+          "totalTokenCount": 2405,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 1312
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 520
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.34,
+        "requires_verification": true
+      }
+    },
+    {
+      "sample": "blue-cross-nc-eob.pdf",
+      "kind": "public_regression",
+      "http_status": 200,
+      "reference_fields_all_correct": true,
+      "type_correct": true,
+      "result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "989.00",
+              "evidence": "Total Amount Provider(s) Charged: $989.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "159.00",
+              "evidence": "What Provider(s) May Bill You: $159.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "561.00",
+              "evidence": "State Health Plan paid $561.00 towards the claims in this summary.",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [],
+          "service_lines": [
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 3,
+              "row": 1,
+              "service_date": "2018-07-30",
+              "code": "91919",
+              "modifiers": "",
+              "units": null,
+              "charge": "199.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "X-RAY (91919) Provider Charged: $199.00"
+            },
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 3,
+              "row": 2,
+              "service_date": "2018-07-30",
+              "code": "12345",
+              "modifiers": "",
+              "units": null,
+              "charge": "570.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "MEDICAL (12345) Provider Charged: $570.00"
+            },
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 3,
+              "row": 3,
+              "service_date": "2018-07-30",
+              "code": "55229",
+              "modifiers": "",
+              "units": null,
+              "charge": "220.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "LABORATORY (55229) Provider Charged: $220.00"
+            }
+          ],
+          "service_lines_complete": true
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "No comparable total-payment and payment-distribution sections were extracted. This does not mean the document is correct.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "not_checked",
+          "coverage": "not_checked",
+          "rows_extracted": 3,
+          "rows_checked": 0,
+          "extraction_complete": true,
+          "findings": [],
+          "skipped": [
+            {
+              "page": 3,
+              "row": 1,
+              "reason": "Modifiers, quantity, service context or line charge are missing or unreadable."
+            },
+            {
+              "page": 3,
+              "row": 2,
+              "reason": "Modifiers, quantity, service context or line charge are missing or unreadable."
+            },
+            {
+              "page": 3,
+              "row": 3,
+              "reason": "Modifiers, quantity, service context or line charge are missing or unreadable."
+            }
+          ],
+          "summary": "Possible duplicate groups: 0. Rows eligible for matching: 0.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": null,
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 4432,
+          "candidatesTokenCount": 693,
+          "totalTokenCount": 5125,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 3120
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 1312
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.88,
+        "requires_verification": true
+      }
+    },
+    {
+      "sample": "healthcomp-eob.pdf",
+      "kind": "public_regression",
+      "http_status": 200,
+      "reference_fields_all_correct": true,
+      "type_correct": true,
+      "result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "60.00",
+              "evidence": "CHARGE AMOUNT 60.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "20.00",
+              "evidence": "PATIENT RESPONSIBILITY 20.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "21.77",
+              "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [
+            {
+              "scope_label": "Claim 1",
+              "scope_evidence": "same_claim_block",
+              "same_scope": "confirmed",
+              "currency": "USD",
+              "reported_total": {
+                "value": "21.77",
+                "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+                "page": 1
+              },
+              "distribution_complete": true,
+              "payments": [
+                {
+                  "row_reference": "row1",
+                  "payee_role": "provider",
+                  "amount": {
+                    "value": "21.77",
+                    "evidence": "$ 21.77",
+                    "page": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "service_lines": [
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 1,
+              "service_date": null,
+              "code": "410",
+              "modifiers": "",
+              "units": null,
+              "charge": "60.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "SERV CODE: 410, CHARGE AMOUNT: 60.00"
+            }
+          ],
+          "service_lines_complete": true
+        },
+        "consistency": {
+          "status": "checked",
+          "checks": [
+            {
+              "rule": "payment_total_vs_distribution",
+              "scope": "Claim 1",
+              "scope_evidence": "same_claim_block",
+              "status": "match",
+              "reported_total": "21.77",
+              "distribution_total": "21.77",
+              "difference": "0.00",
+              "sources": [
+                {
+                  "label": "Reported total payment",
+                  "value": "21.77",
+                  "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution \u2014 row1",
+                  "value": "21.77",
+                  "evidence": "$ 21.77",
+                  "page": 1
+                }
+              ],
+              "explanation": "The extracted total payment equals the sum of the extracted distribution rows. This verifies only this comparison."
+            }
+          ],
+          "summary": "Discrepancies: 0. Comparisons completed: 1. Skipped: 0.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "not_checked",
+          "coverage": "not_checked",
+          "rows_extracted": 1,
+          "rows_checked": 0,
+          "extraction_complete": true,
+          "findings": [],
+          "skipped": [
+            {
+              "page": 1,
+              "row": 1,
+              "reason": "Modifiers, quantity, service context or line charge are missing or unreadable."
+            }
+          ],
+          "summary": "Possible duplicate groups: 0. Rows eligible for matching: 0.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": null,
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 2352,
+          "candidatesTokenCount": 545,
+          "totalTokenCount": 2897,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1040
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 1312
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.89,
+        "requires_verification": true
+      }
+    },
+    {
+      "sample": "jane-jones-eob.pdf",
+      "kind": "public_regression",
+      "http_status": 200,
+      "reference_fields_all_correct": true,
+      "type_correct": true,
+      "result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "92.25",
+              "evidence": "CHARGE AMOUNT 92.25",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "10.77",
+              "evidence": "PATIENT RESPONSIBILITY 10.77",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "43.06",
+              "evidence": "TOTAL PAYMENT AMOUNT 43.06",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [
+            {
+              "scope_label": "Claim 1",
+              "scope_evidence": "matching_claim_reference",
+              "same_scope": "confirmed",
+              "currency": "USD",
+              "reported_total": {
+                "value": "43.06",
+                "evidence": "TOTAL PAYMENT AMOUNT 43.06",
+                "page": 1
+              },
+              "distribution_complete": true,
+              "payments": [
+                {
+                  "row_reference": "row1",
+                  "payee_role": "provider",
+                  "amount": {
+                    "value": "53.83",
+                    "evidence": "$ 53.83",
+                    "page": 1
+                  }
+                },
+                {
+                  "row_reference": "row2",
+                  "payee_role": "other",
+                  "amount": {
+                    "value": "0.00",
+                    "evidence": "$ 0.00",
+                    "page": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "service_lines": [
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 1,
+              "service_date": null,
+              "code": "T1019",
+              "modifiers": "",
+              "units": null,
+              "charge": "92.25",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "TREATMENT DATES 03/30/-03/30/2025 SERV CODE T1019 CHARGE AMOUNT 92.25"
+            }
+          ],
+          "service_lines_complete": true
+        },
+        "consistency": {
+          "status": "review_needed",
+          "checks": [
+            {
+              "rule": "payment_total_vs_distribution",
+              "scope": "Claim 1",
+              "scope_evidence": "matching_claim_reference",
+              "status": "mismatch",
+              "reported_total": "43.06",
+              "distribution_total": "53.83",
+              "difference": "10.77",
+              "sources": [
+                {
+                  "label": "Reported total payment",
+                  "value": "43.06",
+                  "evidence": "TOTAL PAYMENT AMOUNT 43.06",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution \u2014 row1",
+                  "value": "53.83",
+                  "evidence": "$ 53.83",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution \u2014 row2",
+                  "value": "0.00",
+                  "evidence": "$ 0.00",
+                  "page": 1
+                }
+              ],
+              "explanation": "The printed total payment differs from the sum of payment-distribution rows. Ask the issuer to explain which section is correct."
+            }
+          ],
+          "summary": "Discrepancies: 1. Comparisons completed: 1. Skipped: 0.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "not_checked",
+          "coverage": "not_checked",
+          "rows_extracted": 1,
+          "rows_checked": 0,
+          "extraction_complete": true,
+          "findings": [],
+          "skipped": [
+            {
+              "page": 1,
+              "row": 1,
+              "reason": "Modifiers, quantity, service context or line charge are missing or unreadable."
+            }
+          ],
+          "summary": "Possible duplicate groups: 0. Rows eligible for matching: 0.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": {
+          "recipient": "insurance_claims",
+          "subject": "Request to clarify inconsistent payment figures",
+          "body": "To: [Insurance company / claims department]\nFrom: [Your name]\nMember/account ID: [Your member or account ID]\nClaim/reference(s): [Reference for each group below]\nDate: [Today's date]\n\nSubject: Request to clarify inconsistent payment figures\n\nDear Claims Department,\n\nI am requesting a review of the following items in my Explanation of Benefits (EOB):\n\nPayment comparison 1:\n- Reported total payment: $43.06 (PDF page 1)\n  - Distribution row 1: $53.83 (PDF page 1)\n  - Distribution row 2: $0.00 (PDF page 1)\n- Distribution sum: $53.83\n- Difference (distribution minus reported total): $10.77\n\nPlease confirm whether the payment sections refer to the same claim and payment, explain which amount is correct, and provide a corrected document if needed.\n\nI am asking for clarification, not assuming these items are billing errors or that a refund is due. I can provide the document and referenced pages. Please provide a written explanation, any corrected document, a reference number for this inquiry, and the next steps.\n\nThank you,\n[Your name]\n[Preferred contact details]\n",
+          "requires_review": true,
+          "sent": false
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 2872,
+          "candidatesTokenCount": 634,
+          "totalTokenCount": 3506,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1560
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 1312
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 3.05,
+        "requires_verification": true
+      }
+    },
+    {
+      "sample": "cms-good-faith-estimate-blank.pdf",
+      "kind": "public_regression",
+      "http_status": 200,
+      "reference_fields_all_correct": true,
+      "type_correct": true,
+      "result": {
+        "extraction": {
+          "type": "good_faith_estimate",
+          "fields": {
+            "billed_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "plan_paid": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [],
+          "service_lines": [],
+          "service_lines_complete": true
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "Payment reconciliation currently supports EOB documents only.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "not_checked",
+          "coverage": "not_checked",
+          "rows_extracted": 0,
+          "rows_checked": 0,
+          "extraction_complete": false,
+          "findings": [],
+          "skipped": [],
+          "summary": "Duplicate-service checks support itemized EOBs and provider bills only.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": null,
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 7552,
+          "candidatesTokenCount": 178,
+          "totalTokenCount": 7730,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 1312
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 6240
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 1.95,
+        "requires_verification": true
+      }
+    },
+    {
+      "sample": "cms-estimate-vs-bill-examples.pdf",
+      "kind": "public_regression",
+      "http_status": 200,
+      "reference_fields_all_correct": true,
+      "type_correct": true,
+      "result": {
+        "extraction": {
+          "type": "educational_example",
+          "fields": {
+            "billed_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "plan_paid": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            }
+          },
+          "warnings": [
+            "Document is an educational guide explaining good faith estimate dispute rules with multiple worked scenarios."
+          ],
+          "payment_reconciliations": [],
+          "service_lines": [],
+          "service_lines_complete": false
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "Payment reconciliation currently supports EOB documents only.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "not_checked",
+          "coverage": "not_checked",
+          "rows_extracted": 0,
+          "rows_checked": 0,
+          "extraction_complete": false,
+          "findings": [],
+          "skipped": [],
+          "summary": "Duplicate-service checks support itemized EOBs and provider bills only.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": null,
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 2352,
+          "candidatesTokenCount": 198,
+          "totalTokenCount": 2550,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 1312
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1040
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 1.73,
+        "requires_verification": true
+      }
+    },
+    {
+      "sample": "healthcomp-eob.pdf",
+      "kind": "targeted_recheck_after_blank_row_prompt_fix",
+      "http_status": 200,
+      "prompt_sha256": "3373fe2e44acddfe427a213c68f7ef35b35297e3d0d4b6551e1b96b75dce45fd",
+      "result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "60.00",
+              "evidence": "CHARGE AMOUNT 60.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "20.00",
+              "evidence": "PATIENT RESPONSIBILITY 20.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "21.77",
+              "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [
+            {
+              "scope_label": "Claim 1",
+              "scope_evidence": "matching_claim_reference",
+              "same_scope": "confirmed",
+              "currency": "USD",
+              "reported_total": {
+                "value": "21.77",
+                "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+                "page": 1
+              },
+              "distribution_complete": true,
+              "payments": [
+                {
+                  "row_reference": "row1",
+                  "payee_role": "provider",
+                  "amount": {
+                    "value": "21.77",
+                    "evidence": "PROVIDER $ 21.77",
+                    "page": 1
+                  }
+                },
+                {
+                  "row_reference": "row2",
+                  "payee_role": "member",
+                  "amount": {
+                    "value": null,
+                    "evidence": "",
+                    "page": null
+                  }
+                }
+              ]
+            }
+          ],
+          "service_lines": [
+            {
+              "scope": "case1",
+              "scope_confirmed": true,
+              "page": 1,
+              "row": 1,
+              "service_date": null,
+              "code": "410",
+              "modifiers": "",
+              "units": null,
+              "charge": "60.00",
+              "currency": "USD",
+              "kind": "charge",
+              "service_context": "",
+              "evidence": "TREATMENT DATES MM/DD/YY MM/DD/YY SERV CODE 410 CHARGE AMOUNT 60.00"
+            }
+          ],
+          "service_lines_complete": true
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [
+            {
+              "rule": "payment_total_vs_distribution",
+              "scope": "Claim 1",
+              "scope_evidence": "matching_claim_reference",
+              "status": "not_checked",
+              "reported_total": "21.77",
+              "distribution_total": null,
+              "difference": null,
+              "sources": [
+                {
+                  "label": "Reported total payment",
+                  "value": "21.77",
+                  "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution \u2014 row1",
+                  "value": "21.77",
+                  "evidence": "PROVIDER $ 21.77",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution \u2014 row2",
+                  "value": null,
+                  "evidence": "",
+                  "page": null
+                }
+              ],
+              "explanation": "An amount is missing or its source excerpt does not contain the extracted number."
+            }
+          ],
+          "summary": "Discrepancies: 0. Comparisons completed: 0. Skipped: 1.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "duplicates": {
+          "status": "not_checked",
+          "coverage": "not_checked",
+          "rows_extracted": 1,
+          "rows_checked": 0,
+          "extraction_complete": true,
+          "findings": [],
+          "skipped": [
+            {
+              "page": 1,
+              "row": 1,
+              "reason": "Modifiers, quantity, service context or line charge are missing or unreadable."
+            }
+          ],
+          "summary": "Possible duplicate groups: 0. Rows eligible for matching: 0.",
+          "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+        },
+        "review_letter": null,
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 2418,
+          "candidatesTokenCount": 619,
+          "totalTokenCount": 3037,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 1378
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1040
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.91,
+        "requires_verification": true
+      }
+    }
+  ]
+}

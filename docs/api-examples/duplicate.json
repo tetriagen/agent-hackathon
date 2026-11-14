@@ -1,0 +1,131 @@
+{
+  "extraction": {
+    "type": "eob",
+    "fields": {
+      "billed_total": {
+        "value": "150.00",
+        "evidence": "Total billed charges: $150.00",
+        "page": 1
+      },
+      "estimated_total": {
+        "value": null,
+        "evidence": "",
+        "page": null
+      },
+      "patient_responsibility": {
+        "value": "50.00",
+        "evidence": "Patient responsibility: $50.00",
+        "page": 1
+      },
+      "plan_paid": {
+        "value": "100.00",
+        "evidence": "Plan paid: $100.00",
+        "page": 1
+      }
+    },
+    "warnings": [],
+    "payment_reconciliations": [],
+    "service_lines": [
+      {
+        "scope": "case1",
+        "scope_confirmed": true,
+        "page": 1,
+        "row": 1,
+        "service_date": "2026-10-20",
+        "code": "97110",
+        "modifiers": "",
+        "units": "1",
+        "charge": "75.00",
+        "currency": "USD",
+        "kind": "charge",
+        "service_context": "",
+        "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+      },
+      {
+        "scope": "case1",
+        "scope_confirmed": true,
+        "page": 1,
+        "row": 2,
+        "service_date": "2026-10-20",
+        "code": "97110",
+        "modifiers": "",
+        "units": "1",
+        "charge": "75.00",
+        "currency": "USD",
+        "kind": "charge",
+        "service_context": "",
+        "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+      }
+    ],
+    "service_lines_complete": true
+  },
+  "consistency": {
+    "status": "not_checked",
+    "checks": [],
+    "summary": "No comparable total-payment and payment-distribution sections were extracted. This does not mean the document is correct.",
+    "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+  },
+  "duplicates": {
+    "status": "review_needed",
+    "coverage": "complete",
+    "rows_extracted": 2,
+    "rows_checked": 2,
+    "extraction_complete": true,
+    "findings": [
+      {
+        "rule": "possible_duplicate_service",
+        "status": "possible_duplicate",
+        "scope": "case1",
+        "service_date": "2026-10-20",
+        "code": "97110",
+        "modifiers": [],
+        "units": "1",
+        "charge_per_row": "75.00",
+        "service_context": "",
+        "sources": [
+          {
+            "page": 1,
+            "row": 1,
+            "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+          },
+          {
+            "page": 1,
+            "row": 2,
+            "evidence": "Service date: 10/20/2026 | Code: 97110 | Modifiers: none | Units: 1 | Charged: 75.00"
+          }
+        ],
+        "explanation": "Distinct printed rows have the same extracted case, service date, code, modifiers, quantity, charge and shown service context. Ask whether they represent separate services or duplicate billing. Repeated services can be legitimate; no refund or savings is established."
+      }
+    ],
+    "skipped": [],
+    "summary": "Possible duplicate groups: 1. Rows eligible for matching: 2.",
+    "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+  },
+  "review_letter": {
+    "recipient": "insurance_claims",
+    "subject": "Request to clarify possibly repeated service charges",
+    "body": "To: [Insurance company / claims department]\nFrom: [Your name]\nMember/account ID: [Your member or account ID]\nClaim/reference(s): [Reference for each group below]\nDate: [Today's date]\n\nSubject: Request to clarify possibly repeated service charges\n\nDear Claims Department,\n\nI am requesting a review of the following items in my Explanation of Benefits (EOB):\n\nPossible repeated service group 1:\n- Service date: 2026-10-20\n- Service code: 97110\n- Modifiers: none shown\n- Quantity per row: 1\n- Charge per row: $75.00\n- Rows to review: PDF page 1, service row 1; PDF page 1, service row 2\nThese rows appear to have matching service details. Please confirm whether each represents a separately provided service and explain any differences in encounter, time, site, specimen, quantity or coding. If a charge was duplicated, please correct it and explain any effect on my responsibility.\n\nI am asking for clarification, not assuming these items are billing errors or that a refund is due. I can provide the document and referenced pages. Please provide a written explanation, any corrected document, a reference number for this inquiry, and the next steps.\n\nThank you,\n[Your name]\n[Preferred contact details]\n",
+    "requires_review": true,
+    "sent": false
+  },
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "usage": {
+    "promptTokenCount": 1832,
+    "candidatesTokenCount": 571,
+    "totalTokenCount": 2403,
+    "promptTokensDetails": [
+      {
+        "modality": "IMAGE",
+        "tokenCount": 520
+      },
+      {
+        "modality": "TEXT",
+        "tokenCount": 1312
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "seconds": 2.34,
+  "requires_verification": true
+}

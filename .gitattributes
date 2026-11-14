@@ -1,0 +1,2 @@
+# Generated PDF fixtures use byte offsets; never normalize line endings as text.
+tests/fixtures/duplicates/*.pdf binary

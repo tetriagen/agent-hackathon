@@ -30,6 +30,8 @@ def example(total="120.10", rows=("90.10", "30.00")):
             ]
         },
         "warnings": [],
+        "service_lines": [],
+        "service_lines_complete": False,
         "payment_reconciliations": [
             {
                 "scope_label": "Claim 1",

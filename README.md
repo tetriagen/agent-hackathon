@@ -10,6 +10,11 @@ It also checks EOB total payments against payment-distribution rows and shows
 source pages for potential discrepancies. A detected mismatch automatically produces
 an editable letter to the insurer, with copy/TXT download and no additional AI call.
 
+The backend now also screens itemized service rows for possible duplicates and
+returns a combined `review_letter` for payment and service findings. Frontend
+integration is documented in [the API handoff](docs/FRONTEND-API.md); this backend
+update leaves the existing UI unchanged. [Audit and limits](docs/DUPLICATE-AUDIT.md).
+
 **[Run ClearBill and see the implementation boundaries](docs/CLEARBILL.md)**
 
 [Gemini Flash-Lite vs local rules: five-PDF results](docs/GEMINI-COMPARISON.md).

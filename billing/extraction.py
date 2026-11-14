@@ -16,6 +16,8 @@ from pypdf import PdfReader
 from pypdf.errors import PyPdfError
 
 from billing.consistency import check_payments
+from billing.duplicates import check_duplicates
+from billing.letters import draft_review_letter
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -31,6 +33,12 @@ class Amount(StrictModel):
 
     @model_validator(mode="after")
     def require_source(self):
+        if self.value is None:
+            # There is no numeric evidence to show. Do not echo arbitrary text
+            # (including a payee name) from a model's quote for a blank amount.
+            self.evidence = ""
+            self.page = None
+            return self
         if self.value is not None and (
             not self.evidence.strip() or not self.page or self.page < 1
         ):
@@ -66,6 +74,22 @@ class PaymentReconciliation(StrictModel):
     payments: list[DistributionEntry] = Field(max_length=16)
 
 
+class ServiceLine(StrictModel):
+    scope: str = Field(pattern=r"^case[1-9]\d*$", max_length=20)
+    scope_confirmed: bool
+    page: int = Field(ge=1)
+    row: int = Field(ge=1)
+    service_date: str | None = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    code: str | None = Field(max_length=20)
+    modifiers: str | None = Field(max_length=40)
+    units: str | None = Field(pattern=r"^\d{1,4}(?:\.\d{1,3})?$")
+    charge: str | None = Field(pattern=r"^\d{1,8}\.\d{2}$")
+    currency: Literal["USD", "other", "unknown"]
+    kind: Literal["charge", "summary", "adjustment", "repeated_copy", "unknown"]
+    service_context: str | None = Field(max_length=100)
+    evidence: str = Field(max_length=350)
+
+
 class Extraction(StrictModel):
     type: Literal[
         "eob", "good_faith_estimate", "medical_bill", "educational_example", "unknown"
@@ -73,6 +97,8 @@ class Extraction(StrictModel):
     fields: Fields
     warnings: list[str]
     payment_reconciliations: list[PaymentReconciliation] = Field(max_length=8)
+    service_lines: list[ServiceLine] = Field(max_length=12)
+    service_lines_complete: bool
 
 
 PROMPT = """Extract financial fields from the attached medical billing PDF.
@@ -105,6 +131,10 @@ labels like "row1", "row2". Never output names, claim IDs or check numbers.
 For reported_total use the explicitly printed TOTAL PAYMENT AMOUNT. For payments
 extract every PAYEE/AMOUNT row in PAYMENT DISTRIBUTION (including zero amounts).
 Keep rows with unreadable amounts as null; do not omit them and mark complete.
+This includes listed payees with a BLANK amount cell: retain that row with null
+amount and distribution_complete false. An empty cell is not zero and is not
+permission to ignore the payee. Inspect each printed payee row before reporting
+distribution_complete; never mark complete when a listed row is blank or omitted.
 Do not use covered/allowed/adjusted amounts, charged totals, patient responsibility,
 deductible, copay, or savings as distribution payments. Do not count a repeated
 row or a distribution grand total in addition to its individual payee rows.
@@ -119,6 +149,36 @@ multi-scenario examples, blank forms and non-EOB documents return an empty list.
 Every amount needs a short source excerpt containing the column/section label
 and the printed number, plus its 1-based PDF page. Do not correct source numbers
 or choose the nicer-looking one. Preserve contradictions for the server check.
+SERVICE LINES: For EOBs and provider bills, extract up to the first 12 original
+itemized service rows in page order, not just suspected duplicates. Never decide
+duplicates yourself. Set service_lines_complete false if rows are omitted, unreadable,
+or the document has no usable itemized rows; otherwise true. For other document
+types return an empty list and false. Keep the output concise to fit the token cap.
+scope is an anonymous case1, case2 etc for the SAME patient, billing/rendering
+provider and claim. Different patients/providers/claims MUST have different scopes;
+scope_confirmed false when these relationships cannot be verified. Never print IDs.
+page is the 1-based PDF page; row is the 1-based physical service-row ordinal on
+that page across all service tables. The same printed row must not be extracted
+twice. A summary, glossary, repeated page copy, correction, reversal or adjustment
+is not a new charge: label kind accordingly. Do not infer that equal rows are copies.
+service_date is one explicitly printed calendar date in YYYY-MM-DD; use null for
+date ranges, missing, ambiguous or unreadable dates. code is the printed service
+code only (no modifiers); never invent codes from descriptions. modifiers includes
+all printed modifiers separated by commas; empty string when none are shown, null
+when unreadable. units is the printed quantity, null if absent; never assume 1.
+charge is the billed amount for THIS ROW, not allowed/paid/patient amount or unit
+price. Negative/credit lines use kind adjustment and null charge. service_context
+copies explicitly printed service time, anatomical site, specimen or encounter
+details for that row, verbatim and without identities. Empty string if no such
+details are shown; null if unreadable. Include these details in evidence too.
+Do NOT judge whether a repeat is legitimate or separate. Server code compares
+the extracted context. Separate printed rows or "separately listed charge" do not
+describe service time/site/specimen/encounter and are not service_context.
+evidence is a short labeled transcription of the service row: include the printed
+date, code, modifiers, quantity and charge, no identities. Pair the original column
+headings with their row values, even when the heading is printed above the table;
+always label quantity as Units: or Qty: followed by its printed value. Use null
+units if no quantity is printed. This lets server code check the quantity evidence.
 Do not determine legality, eligibility, fraud, savings, or clinical advice.
 """
 
@@ -178,7 +238,16 @@ def finish_extraction(result, pages):
         amounts.extend([group.reported_total, *(p.amount for p in group.payments)])
     if any(a.page is not None and not 1 <= a.page <= pages for a in amounts):
         raise ValueError("The model returned an invalid source page.")
-    return {"extraction": result.model_dump(), "consistency": check_payments(result)}
+    if any(line.page > pages for line in result.service_lines):
+        raise ValueError("The model returned an invalid service source page.")
+    consistency = check_payments(result)
+    duplicates = check_duplicates(result)
+    return {
+        "extraction": result.model_dump(),
+        "consistency": consistency,
+        "duplicates": duplicates,
+        "review_letter": draft_review_letter(result.type, consistency, duplicates),
+    }
 
 
 def gemini_schema():

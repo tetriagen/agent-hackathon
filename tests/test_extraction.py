@@ -99,6 +99,9 @@ def test_extracted_amount_requires_evidence_and_decimal_format():
     with pytest.raises(ValidationError):
         extraction.Amount(value="1e3", evidence="Total 1e3", page=1)
     assert extraction.Amount(value=None, evidence="", page=None).value is None
+    blank = extraction.Amount(value=None, evidence="PRIVATE_PAYEE_NAME", page=1)
+    assert blank.evidence == ""
+    assert blank.page is None
 
 
 def test_sdk_receives_original_pdf_and_no_storage_or_tools(monkeypatch):
@@ -117,6 +120,8 @@ def test_sdk_receives_original_pdf_and_no_storage_or_tools(monkeypatch):
         },
         warnings=["unreadable"],
         payment_reconciliations=[],
+        service_lines=[],
+        service_lines_complete=False,
     )
 
     class FakeClient:
@@ -183,6 +188,8 @@ def test_gemini_contract_and_safe_failures(monkeypatch, status, finish):
         },
         "warnings": [],
         "payment_reconciliations": [],
+        "service_lines": [],
+        "service_lines_complete": False,
     }
     captured = {}
 
