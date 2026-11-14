@@ -1,7 +1,7 @@
 """Explicit remote sample run: python -m billing.compare_samples PDF_DIR OUTPUT_JSON.
 
 Reads only the five public sample filenames in pdf-expected.json. Does not retry
-failed model calls, stops on billing/auth errors, and saves after every response.
+failed model calls, stops on any failed request, and saves after every response.
 Never includes an API key, raw PDF, or provider error body in the report.
 """
 
@@ -80,9 +80,7 @@ def main():
                     "No model result; request failed. This is not an extraction error score."
                 )
             report["samples"].append(row)
-            report["status"] = (
-                "blocked" if response.status_code in (429, 503) else "running"
-            )
+            report["status"] = "blocked" if response.status_code != 200 else "running"
             args.output.write_text(json.dumps(report, indent=2) + "\n")
             print(f"{name}: HTTP {response.status_code}", flush=True)
             if report["status"] == "blocked":

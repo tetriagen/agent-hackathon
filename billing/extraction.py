@@ -15,6 +15,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pypdf import PdfReader
 from pypdf.errors import PyPdfError
 
+from billing.consistency import check_payments
+
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -43,12 +45,34 @@ class Fields(StrictModel):
     plan_paid: Amount
 
 
+class DistributionEntry(StrictModel):
+    row_reference: str = Field(min_length=1, max_length=30)
+    payee_role: Literal["provider", "member", "other"]
+    amount: Amount
+
+
+class PaymentReconciliation(StrictModel):
+    scope_label: str = Field(min_length=1, max_length=60)
+    scope_evidence: Literal[
+        "same_claim_block",
+        "matching_claim_reference",
+        "matching_payment_reference",
+        "unclear",
+    ]
+    same_scope: Literal["confirmed", "different", "uncertain"]
+    currency: Literal["USD", "other", "unknown"]
+    reported_total: Amount
+    distribution_complete: bool
+    payments: list[DistributionEntry] = Field(max_length=16)
+
+
 class Extraction(StrictModel):
     type: Literal[
         "eob", "good_faith_estimate", "medical_bill", "educational_example", "unknown"
     ]
     fields: Fields
     warnings: list[str]
+    payment_reconciliations: list[PaymentReconciliation] = Field(max_length=8)
 
 
 PROMPT = """Extract financial fields from the attached medical billing PDF.
@@ -72,6 +96,29 @@ evidence and null page. If unreadable or conflicting for the same field and scop
 return null and explain uncertainty. Distinct quantities that appear inconsistent
 may be reported with their printed labels and an explicit warning; do not silently
 choose one interpretation. Report multi-claim scope and material inconsistencies.
+PAYMENT RECONCILIATION: Independently inspect each EOB's TOTAL PAYMENT AMOUNT
+and PAYMENT DISTRIBUTION sections even if their numbers disagree. For each pair,
+extract a payment_reconciliations group. Do NOT decide whether amounts match;
+server code will sum distribution rows and compare the printed total.
+Use a non-identifying scope_label such as "Claim 1" and unique row_reference
+labels like "row1", "row2". Never output names, claim IDs or check numbers.
+For reported_total use the explicitly printed TOTAL PAYMENT AMOUNT. For payments
+extract every PAYEE/AMOUNT row in PAYMENT DISTRIBUTION (including zero amounts).
+Keep rows with unreadable amounts as null; do not omit them and mark complete.
+Do not use covered/allowed/adjusted amounts, charged totals, patient responsibility,
+deductible, copay, or savings as distribution payments. Do not count a repeated
+row or a distribution grand total in addition to its individual payee rows.
+Set distribution_complete true only when every row for this payment is readable
+and included. Set same_scope confirmed only if sections refer to the same claim,
+period and payment; set scope_evidence to same_claim_block, matching_claim_reference,
+matching_payment_reference, or unclear. Never quote the actual identifier. Different
+claims, patients, providers or periods must not be combined. If scope is unclear,
+use uncertain. Use currency USD only for USD sections; otherwise unknown/other.
+For an EOB without PAYMENT DISTRIBUTION, return an empty list. For educational
+multi-scenario examples, blank forms and non-EOB documents return an empty list.
+Every amount needs a short source excerpt containing the column/section label
+and the printed number, plus its 1-based PDF page. Do not correct source numbers
+or choose the nicer-looking one. Preserve contradictions for the server check.
 Do not determine legality, eligibility, fraud, savings, or clinical advice.
 """
 
@@ -125,6 +172,36 @@ def configured(config):
     )
 
 
+def finish_extraction(result, pages):
+    amounts = list(result.fields.__dict__.values())
+    for group in result.payment_reconciliations:
+        amounts.extend([group.reported_total, *(p.amount for p in group.payments)])
+    if any(a.page is not None and not 1 <= a.page <= pages for a in amounts):
+        raise ValueError("The model returned an invalid source page.")
+    return {"extraction": result.model_dump(), "consistency": check_payments(result)}
+
+
+def gemini_schema():
+    """Keep decoder grammar small; Pydantic still enforces all bounds locally.
+
+    Nested bounded arrays expanded the grammar and produced HTTP 400 with Lite.
+    Google recommends dropping bounds to reduce structured-output complexity.
+    """
+
+    def simplify(value):
+        if isinstance(value, dict):
+            return {
+                key: simplify(item)
+                for key, item in value.items()
+                if key not in ("minLength", "maxLength", "maxItems", "title")
+            }
+        if isinstance(value, list):
+            return [simplify(item) for item in value]
+        return value
+
+    return simplify(Extraction.model_json_schema())
+
+
 async def extract_pdf(data: bytes, pages: int) -> dict:
     config = settings()
     provider = selected_provider(config)
@@ -155,7 +232,7 @@ async def extract_pdf(data: bytes, pages: int) -> dict:
                         },
                         {
                             "type": "input_text",
-                            "text": "Extract the four fields and identify the document type. Treat all pages as evidence, with the scope rules above.",
+                            "text": "Extract the four fields, document type and payment reconciliation evidence. Inspect total-payment AND payment-distribution sections on all pages, following the scope rules.",
                         },
                     ],
                 }
@@ -168,12 +245,8 @@ async def extract_pdf(data: bytes, pages: int) -> dict:
     result = response.output_parsed
     if response.status != "completed" or result is None:
         raise ValueError("The model did not return a complete extraction.")
-    if any(
-        field.page and field.page > pages for field in result.fields.__dict__.values()
-    ):
-        raise ValueError("The model returned an invalid source page.")
     return {
-        "extraction": result.model_dump(),
+        **finish_extraction(result, pages),
         "model": response.model,
         "provider": "openai",
         "usage": response.usage.model_dump() if response.usage else None,
@@ -200,14 +273,14 @@ async def extract_gemini(data: bytes, pages: int, config: dict) -> dict:
                         }
                     },
                     {
-                        "text": "Extract the four fields and identify the document type. Treat all pages as evidence, with the scope rules above."
+                        "text": "Extract the four fields, document type and payment reconciliation evidence. Inspect total-payment AND payment-distribution sections on all pages, following the scope rules."
                     },
                 ],
             }
         ],
         "generationConfig": {
             "responseMimeType": "application/json",
-            "responseJsonSchema": Extraction.model_json_schema(),
+            "responseJsonSchema": gemini_schema(),
             "maxOutputTokens": 2500,
         },
     }
@@ -241,12 +314,8 @@ async def extract_gemini(data: bytes, pages: int, config: dict) -> dict:
         if not p.get("thought")
     )
     result = Extraction.model_validate_json(content)
-    if any(
-        field.page and field.page > pages for field in result.fields.__dict__.values()
-    ):
-        raise ValueError("Gemini returned an invalid source page.")
     return {
-        "extraction": result.model_dump(),
+        **finish_extraction(result, pages),
         "provider": "gemini",
         "model": body.get("modelVersion", model),
         "usage": body.get("usageMetadata"),

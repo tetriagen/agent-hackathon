@@ -25,5 +25,11 @@ pre { background: #f1f5f9; padding: 14px; white-space: pre-wrap; overflow-wrap: 
 a { color: #1d4ed8; }
 dt { font-weight: 600; }
 dd { margin: 4px 0 12px; overflow-wrap: anywhere; color: #475569; }
+.consistency { margin-top: 16px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.payment-check { border-left: 3px solid #64748b; padding: 0 12px; margin: 16px 0; }
+.payment-check.mismatch { border-color: #92400e; }
+.payment-check.mismatch h4 { color: #92400e; }
+.consistency summary { cursor: pointer; padding: 10px 0; min-height: 24px; }
+.consistency li { margin-bottom: 12px; }
 @media (max-width: 650px) { .columns { grid-template-columns: 1fr; } body { padding: 12px; } fieldset, #result { padding: 12px; } }
 @media print { body { background: white; } body > a, main > :not(#result), #result > :not(#letter) { display: none; } #result { border: 0; padding: 0; } #letter { background: white; } }

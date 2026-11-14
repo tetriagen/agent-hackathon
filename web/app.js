@@ -194,7 +194,50 @@ $('print').addEventListener('click', () => { if (draft) window.print(); });
 invalidate();
 
 
-// Explicitly separate remote PDF extraction from local reading and legal rules.
+function renderConsistency(box, result) {
+  const section = document.createElement('section');
+  section.className = 'consistency';
+  const add = (tag, text, parent = section) => {
+    const node = document.createElement(tag);
+    node.textContent = text;
+    parent.append(node);
+    return node;
+  };
+  add('h3', 'Payment consistency checks');
+  if (!result) {
+    add('p', 'Payment consistency was not checked. Extracted amounts alone do not verify the document.');
+    box.append(section);
+    return;
+  }
+  add('strong', result.status === 'review_needed' ? 'Potential payment mismatch found'
+    : result.status === 'checked' ? 'Payment totals compared' : 'Not enough comparable payment data');
+  add('p', result.summary);
+  for (const check of result.checks) {
+    const item = document.createElement('div');
+    item.className = `payment-check ${check.status === 'mismatch' ? 'mismatch' : ''}`;
+    section.append(item);
+    const status = check.status === 'mismatch' ? 'Mismatch to verify' : check.status === 'match' ? 'These totals match' : 'Comparison skipped';
+    add('h4', `${status} — ${check.scope}`, item);
+    if (check.difference !== null) {
+      add('p', `Reported total payment: ${money.format(check.reported_total)}. Sum of payment distribution: ${money.format(check.distribution_total)}.`, item);
+      const difference = Number(check.difference);
+      add('p', difference ? `Difference: ${money.format(Math.abs(difference))} — distribution is ${difference > 0 ? 'higher' : 'lower'} than the reported total.` : 'Difference: $0.00.', item);
+    }
+    add('p', check.explanation, item);
+    const details = add('details', '', item);
+    add('summary', 'Source amounts and PDF pages — verify in the original', details);
+    const scopeReason = {same_claim_block:'Both sections appear in the same claim block.', matching_claim_reference:'The sections have matching claim references.', matching_payment_reference:'The sections have matching payment references.', unclear:'The relationship between these sections is unclear.'};
+    add('p', `AI scope assessment: ${scopeReason[check.scope_evidence] || 'Not established.'}`, details);
+    const sources = add('ul', '', details);
+    for (const source of check.sources) {
+      add('li', `${source.label}: ${source.value === null ? 'not readable' : money.format(source.value)}${source.page ? ` · PDF page ${source.page}` : ''}. Excerpt: ${source.evidence || 'not available'}`, sources);
+    }
+  }
+  add('p', result.limitation).className = 'note';
+  box.append(section);
+}
+
+// AI reads source sections; deterministic code checks the payment arithmetic.
 document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener('click', async () => {
   if (!aiProvider) { notice('AI is not configured. Local reading still works.', true); return; }
   const kind = button.dataset.ai;
@@ -210,12 +253,13 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
   $('controls').disabled = true; $('demo').disabled = true; $('reset').disabled = true;
   const abort = new AbortController();
   const timeout = setTimeout(() => abort.abort(), 120000);
-  notice(`Sending the original PDF to ${aiProviderLabel} and extracting fields…`);
+  notice(`Reading the original PDF with ${aiProviderLabel} and checking related payment totals…`);
   try {
     const response = await fetch('/api/extract', {method:'POST', headers:{'Content-Type':'application/pdf','X-AI-Consent':'send-original-pdf','X-AI-Provider':aiProvider}, body:file, signal:abort.signal});
     const data = await response.json();
     if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'AI extraction failed.');
     const result = data.extraction;
+    renderConsistency(box, data.consistency);
     const title = document.createElement('h3'); title.textContent = 'Local rules vs AI'; box.append(title);
     const info = document.createElement('p');
     info.textContent = `Local type: ${local.type}. AI type: ${result.type}. Model: ${data.model}. ${data.seconds}s. AI fields are suggestions: verify each one against the PDF. Local rules used the editable text above; AI read the original PDF.`; box.append(info);
@@ -227,7 +271,7 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
       if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`AI source excerpt (verify): ${field.evidence}`; box.append(source); }
     }
     for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;box.append(p); }
-    notice('AI comparison complete. Review the source PDF. AI values have not changed the confirmed facts below.');
+    notice(`${data.consistency?.status === 'review_needed' ? 'Potential payment mismatch found. ' : ''}AI review complete. Review the source PDF. AI values have not changed the confirmed facts below.`);
   } catch (error) { notice(error.name === 'AbortError' ? 'AI request timed out. Local rules still work.' : error.message, true); }
   finally { clearTimeout(timeout); reading--; $('controls').disabled=false; $('demo').disabled=false; $('reset').disabled=false; }
 }));

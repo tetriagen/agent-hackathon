@@ -116,6 +116,7 @@ def test_sdk_receives_original_pdf_and_no_storage_or_tools(monkeypatch):
             ]
         },
         warnings=["unreadable"],
+        payment_reconciliations=[],
     )
 
     class FakeClient:
@@ -150,6 +151,7 @@ def test_sdk_receives_original_pdf_and_no_storage_or_tools(monkeypatch):
     )
     assert captured["client"]["max_retries"] == 0
     assert response["requires_verification"] is True
+    assert response["consistency"]["status"] == "not_checked"
 
 
 def test_provider_change_requires_new_consent(monkeypatch):
@@ -180,6 +182,7 @@ def test_gemini_contract_and_safe_failures(monkeypatch, status, finish):
             ]
         },
         "warnings": [],
+        "payment_reconciliations": [],
     }
     captured = {}
 
@@ -225,3 +228,7 @@ def test_gemini_contract_and_safe_failures(monkeypatch, status, finish):
         == "application/pdf"
     )
     assert "tools" not in payload
+    assert payload["generationConfig"]["maxOutputTokens"] == 2500
+    schema = payload["generationConfig"]["responseJsonSchema"]
+    assert "payment_reconciliations" in schema["required"]
+    assert "maxItems" not in json.dumps(schema)
