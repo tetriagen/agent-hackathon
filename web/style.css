@@ -23,5 +23,7 @@ pre { background: #f1f5f9; padding: 14px; white-space: pre-wrap; overflow-wrap: 
 #notice { padding: 12px; border-left: 3px solid #64748b; }
 #notice.error { border-color: #b91c1c; color: #991b1b; }
 a { color: #1d4ed8; }
+dt { font-weight: 600; }
+dd { margin: 4px 0 12px; overflow-wrap: anywhere; color: #475569; }
 @media (max-width: 650px) { .columns { grid-template-columns: 1fr; } body { padding: 12px; } fieldset, #result { padding: 12px; } }
 @media print { body { background: white; } body > a, main > :not(#result), #result > :not(#letter) { display: none; } #result { border: 0; padding: 0; } #letter { background: white; } }

@@ -2,9 +2,9 @@
 
 ## ClearBill scaffold
 
-The medical-bill prototype lives in `billing/` + `web/`. It reads text PDF/TXT
-documents locally, compares user-confirmed amounts through FastAPI, and exports
-a draft request. No API key is needed. AI extraction and OCR are not yet connected.
+The medical-bill prototype lives in `billing/` + `web/`. It reads PDF/TXT documents and scanned PDFs locally, extracts labeled fields
+using deterministic rules, compares user-confirmed amounts through FastAPI, and
+exports a draft request. No API key or remote language model is used.
 
 **[Run ClearBill and see the implementation boundaries](docs/CLEARBILL.md)**
 

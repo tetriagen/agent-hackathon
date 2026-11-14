@@ -21,8 +21,9 @@ async def privacy_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; script-src 'self'; style-src 'self'; "
+        "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; "
         "connect-src 'self'; worker-src 'self' blob:; "
+        "img-src 'self' blob: data:; font-src 'self' blob:; "
         "object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
     )
     return response
@@ -58,4 +59,12 @@ async def review(request: Request):
 vendor = ROOT / "node_modules" / "pdfjs-dist" / "build"
 if vendor.is_dir():
     app.mount("/vendor/pdfjs", StaticFiles(directory=vendor), name="pdfjs")
+for route, path in {
+    "tesseract": "tesseract.js/dist",
+    "tesseract-core": "tesseract.js-core",
+    "tessdata": "@tesseract.js-data/eng/4.0.0",
+}.items():
+    directory = ROOT / "node_modules" / path
+    if directory.is_dir():
+        app.mount(f"/vendor/{route}", StaticFiles(directory=directory), name=route)
 app.mount("/", StaticFiles(directory=ROOT / "web", html=True), name="web")

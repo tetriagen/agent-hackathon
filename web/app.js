@@ -1,10 +1,13 @@
-import { answer, findTotal, draftLetter } from './core.mjs';
+import { answer, draftLetter } from './core.mjs';
+import { parseDocument } from './document-parser.mjs';
+import { readDocument } from './ingestion.mjs';
 
 const $ = (id) => document.getElementById(id);
 let reading = 0;
 let generation = 0;
 let controller = null;
 let draft = '';
+const ocrUsed = { estimate: false, bill: false };
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 function facts() {
@@ -31,37 +34,33 @@ function invalidate() {
 }
 
 function suggest(kind) {
-  const match = findTotal($(`${kind}-text`).value);
-  $(`${kind}-amount`).value = match?.amount ?? '';
-  $(`${kind}-evidence`).textContent = match
-    ? `Local match: “${match.evidence}”. Confirm this is the correct total.`
-    : 'No single clear total found. Enter the amount manually.';
+  const parsed = parseDocument($(`${kind}-text`).value, { usedOCR: ocrUsed[kind] });
+  const box = $(`${kind}-parsed`);
+  box.replaceChildren();
+  const heading = document.createElement('p');
+  heading.textContent = `Document type: ${parsed.type.replaceAll('_', ' ')}. Local rules, no language model.`;
+  box.append(heading);
+  const fields = document.createElement('dl');
+  for (const [name, field] of Object.entries(parsed.fields)) {
+    if (field.value === null) continue;
+    const label = document.createElement('dt');
+    label.textContent = `${name.replaceAll('_', ' ')}: ${money.format(field.value)}`;
+    const quote = document.createElement('dd');
+    quote.textContent = `Source: ${field.evidence}`;
+    fields.append(label, quote);
+  }
+  box.append(fields);
+  for (const warning of parsed.warnings) {
+    const paragraph = document.createElement('p'); paragraph.className = 'note';
+    paragraph.textContent = warning; box.append(paragraph);
+  }
+  const correctType = kind === 'estimate' ? parsed.type === 'good_faith_estimate' : parsed.type === 'medical_bill';
+  const field = parsed.fields[kind === 'estimate' ? 'estimated_total' : 'billed_total'];
+  $(`${kind}-amount`).value = correctType ? (field.value ?? '') : '';
+  $(`${kind}-evidence`).textContent = correctType && field.value !== null
+    ? `Local match: “${field.evidence}”. Confirm this is the correct total.`
+    : 'No amount copied to the self-pay comparison. Check the document type and amounts.';
   invalidate();
-}
-
-async function readFile(file) {
-  if (file.size > 10 * 1024 * 1024) throw new Error('File is larger than 10 MB. Use a smaller document.');
-  let text;
-  if (/\.txt$/i.test(file.name)) text = await file.text();
-  else if (/\.pdf$/i.test(file.name)) {
-    const pdfjs = await import('/vendor/pdfjs/pdf.mjs');
-    pdfjs.GlobalWorkerOptions.workerSrc = '/vendor/pdfjs/pdf.worker.mjs';
-    const task = pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false });
-    try {
-      const pdf = await task.promise;
-      if (pdf.numPages > 30) throw new Error('Use a PDF with 30 pages or fewer.');
-      const pages = [];
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        pages.push(content.items.map(item => item.str + (item.hasEOL ? '\n' : ' ')).join(''));
-      }
-      text = pages.join('\n\n');
-    } finally { await task.destroy(); }
-  } else throw new Error('Choose a text PDF or .txt file. Photos are not supported yet.');
-  if (!text.trim()) throw new Error('No text found. This may be a scan. Paste text or enter amounts manually.');
-  if (text.length > 100000) throw new Error('Too much text. Use a shorter document.');
-  return text;
 }
 
 for (const kind of ['estimate', 'bill']) {
@@ -72,27 +71,32 @@ for (const kind of ['estimate', 'bill']) {
     reading++;
     $('controls').disabled = true;
     $('demo').disabled = true;
+    $('reset').disabled = true;
     $(`${kind}-text`).value = '';
     $(`${kind}-amount`).value = '';
     $(`${kind}-evidence`).textContent = '';
+    $(`${kind}-parsed`).replaceChildren();
+    ocrUsed[kind] = false;
     invalidate();
     notice('Reading the document in your browser…');
     try {
-      const text = await readFile(file);
+      const result = await readDocument(file, message => notice(message));
       if (token !== generation) return;
-      $(`${kind}-text`).value = text;
+      $(`${kind}-text`).value = result.text;
+      ocrUsed[kind] = result.usedOCR;
       suggest(kind);
-      notice('Document read locally. Check the suggested amount.');
+      notice('Document read locally. Review the extracted fields and any warnings.');
     } catch (error) {
       if (token === generation) notice(error.message.startsWith('Failed to fetch') ? 'PDF reader is unavailable. Install the npm dependencies or paste text instead.' : error.message, true);
     } finally {
       reading--;
-      if (!reading) { $('controls').disabled = false; $('demo').disabled = false; }
+      if (!reading) { $('controls').disabled = false; $('demo').disabled = false; $('reset').disabled = false; }
     }
   });
   $(`${kind}-text`).addEventListener('input', () => {
     $(`${kind}-amount`).value = '';
     $(`${kind}-evidence`).textContent = 'Text changed. Find the total again or enter it manually.';
+    $(`${kind}-parsed`).replaceChildren();
   });
 }
 
@@ -102,6 +106,7 @@ $('review-form').addEventListener('change', event => { if (event.target.id !== '
 
 $('demo').addEventListener('click', () => {
   $('review-form').reset();
+  ocrUsed.estimate = false; ocrUsed.bill = false;
   $('estimate-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nGood faith estimate\nOffice procedure: $900.00\nTotal estimated cost: $900.00';
   $('bill-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nMedical bill\nOffice procedure: $1,650.00\nTotal charges: $1,650.00';
   suggest('estimate'); suggest('bill');
@@ -116,7 +121,11 @@ $('reset').addEventListener('click', () => {
   generation++;
   controller?.abort();
   $('review-form').reset();
-  for (const kind of ['estimate', 'bill']) $(`${kind}-evidence`).textContent = '';
+  for (const kind of ['estimate', 'bill']) {
+    $(`${kind}-evidence`).textContent = '';
+    $(`${kind}-parsed`).replaceChildren();
+    ocrUsed[kind] = false;
+  }
   invalidate();
   notice('Case cleared.');
 });
@@ -124,6 +133,13 @@ $('reset').addEventListener('click', () => {
 $('review-form').addEventListener('submit', async event => {
   event.preventDefault();
   if (reading || controller) return;
+  for (const kind of ['estimate', 'bill']) {
+    const type = parseDocument($(`${kind}-text`).value).type;
+    if (['eob', 'educational_example'].includes(type) || (kind === 'bill' && type === 'good_faith_estimate') || (kind === 'estimate' && type === 'medical_bill')) {
+      notice('These document types do not form a self-pay estimate and bill. Read the extracted fields above or clear the documents to enter a supported case.', true);
+      return;
+    }
+  }
   const payload = facts();
   const token = generation;
   controller = new AbortController();

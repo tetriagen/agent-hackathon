@@ -13,7 +13,7 @@
 <main id="main">
   <h1>ClearBill</h1>
   <p>Compare a medical bill with your estimate. Prepare your next step.</p>
-  <p class="note">Early prototype · Self-pay comparison · No AI analysis yet</p>
+  <p class="note">Local document rules + OCR · No OpenAI key needed</p>
   <p>Files and document text stay in this browser. Only the amounts and answers shown below are sent to the server. Nothing is saved after a reload.</p>
   <button type="button" id="demo">Load synthetic example</button>
   <button type="button" id="reset">Clear this case</button>
@@ -22,30 +22,32 @@
   <form id="review-form">
     <fieldset id="controls">
       <legend>1. Read your documents locally</legend>
-      <p>Text PDFs and .txt files, up to 10 MB and 30 PDF pages. Scans and photos need OCR, which is not connected yet.</p>
+      <p>PDF and .txt files, up to 10 MB and 30 pages. Up to 5 scanned pages are recognized locally using English OCR. Check every recognized amount.</p>
       <div class="columns">
         <section>
-          <h2>Good faith estimate</h2>
+          <h2>Estimate / first document</h2>
           <label for="estimate-file">Choose estimate</label>
           <input id="estimate-file" type="file" accept=".pdf,.txt">
           <label for="estimate-text">Estimate text — stays in your browser</label>
           <textarea id="estimate-text" rows="8" maxlength="100000" spellcheck="false"></textarea>
-          <button type="button" data-suggest="estimate">Find a labeled total</button>
+          <button type="button" data-suggest="estimate">Read document fields</button>
           <p id="estimate-evidence" class="note"></p>
+          <div id="estimate-parsed" aria-live="polite"></div>
         </section>
         <section>
-          <h2>Medical bill</h2>
+          <h2>Bill / EOB / second document</h2>
           <label for="bill-file">Choose bill</label>
           <input id="bill-file" type="file" accept=".pdf,.txt">
           <label for="bill-text">Bill text — stays in your browser</label>
           <textarea id="bill-text" rows="8" maxlength="100000" spellcheck="false"></textarea>
-          <button type="button" data-suggest="bill">Find a labeled total</button>
+          <button type="button" data-suggest="bill">Read document fields</button>
           <p id="bill-evidence" class="note"></p>
+          <div id="bill-parsed" aria-live="polite"></div>
         </section>
       </div>
 
-      <h2>2. Confirm the facts</h2>
-      <p>Total detection is a simple local helper. Check the amounts against your documents.</p>
+      <h2>2. Compare a self-pay estimate and bill</h2>
+      <p>Rules recognize a limited set of labels. EOBs and teaching examples are shown separately and cannot be used as self-pay bills here. Unknown formats require manual entry.</p>
       <div class="columns">
         <div><label for="estimate-amount">Estimated amount (USD)</label><input id="estimate-amount" required inputmode="decimal" pattern="[0-9]{1,8}(\.[0-9]{1,2})?" placeholder="900.00" autocomplete="off"></div>
         <div><label for="bill-amount">Billed amount (USD)</label><input id="bill-amount" required inputmode="decimal" pattern="[0-9]{1,8}(\.[0-9]{1,2})?" placeholder="1650.00" autocomplete="off"></div>

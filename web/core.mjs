@@ -1,9 +1,3 @@
-export function findTotal(text) {
-  const candidates = [...text.matchAll(/\b(?:grand total|total estimated(?: cost)?|estimated total|total charges|total amount|amount due|total)\s*[:=]?\s*\$?\s*(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)(?![\d.,])/gi)];
-  if (candidates.length !== 1) return null;
-  return { amount: candidates[0][1].replaceAll(",", ""), evidence: candidates[0][0] };
-}
-
 export function answer(value) {
   return value === "yes" ? true : value === "no" ? false : null;
 }
