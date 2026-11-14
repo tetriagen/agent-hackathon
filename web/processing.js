@@ -2,15 +2,15 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const dialog = document.createElement('dialog');
 dialog.id = 'processing-dialog';
 dialog.setAttribute('aria-labelledby','processing-title');
-dialog.innerHTML = `<div class="processing-top"><span>ClearBill / Document review</span><button type="button" class="processing-hide">Hide animation</button></div>
+dialog.innerHTML = `<div class="processing-top"><span>ClearBill / Document review</span></div>
+<h2 id="processing-title" tabindex="-1">One moment.</h2>
 <div class="processing-scene" aria-hidden="true"><div class="processing-paper"><div class="processing-front"><span class="processing-pdf">PDF</span><strong>YOUR<br>MEDICAL BILL.</strong><i></i><i></i><i></i><div class="processing-total">$ ———</div><small>Every detail matters.</small></div><div class="processing-back"><span>+</span>ClearBill.</div><div class="processing-edge"></div></div><div class="processing-lens"><svg viewBox="0 0 80 80"><circle cx="31" cy="31" r="22" fill="#f2b0a5" fill-opacity=".3" stroke="#f9ddd4" stroke-width="7"/><path d="m48 48 23 23" stroke="#f9ddd4" stroke-width="10" stroke-linecap="round"/></svg></div><canvas class="processing-particles" width="840" height="660"></canvas><div class="processing-check">✓</div></div>
-<h2 id="processing-title">One moment.</h2><p id="processing-status" role="status" aria-live="polite"></p><p class="processing-detail"></p><button type="button" class="processing-pause" aria-pressed="false">Pause motion</button>`;
+<p id="processing-status" role="status" aria-live="polite"></p><p class="processing-detail"></p><button type="button" class="processing-pause" aria-pressed="false">Pause motion</button>`;
 document.body.append(dialog);
 const title=dialog.querySelector('h2'), status=dialog.querySelector('#processing-status'), detail=dialog.querySelector('.processing-detail');
 const pause=dialog.querySelector('.processing-pause');
 let started=0, visible=true, previousFocus=null, animation=0;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-dialog.querySelector('.processing-hide').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('close',()=>{visible=false;cancelAnimationFrame(animation);});
 pause.addEventListener('click',()=>{const paused=dialog.classList.toggle('motion-paused');pause.textContent=paused?'Resume motion':'Pause motion';pause.setAttribute('aria-pressed',String(paused));});
 export function beginProcessing(message, description){
@@ -18,6 +18,7 @@ export function beginProcessing(message, description){
   dialog.classList.remove('complete','motion-paused');pause.textContent='Pause motion';pause.setAttribute('aria-pressed','false');
   title.textContent='One moment.';status.textContent=message;detail.textContent=description;
   dialog.showModal();
+  title.focus({preventScroll:true});
 }
 function particles(){
   const canvas=dialog.querySelector('canvas'),ctx=canvas.getContext('2d');
