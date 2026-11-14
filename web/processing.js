@@ -22,16 +22,29 @@ export function beginProcessing(message, description){
 }
 function particles(){
   const canvas=dialog.querySelector('canvas'),ctx=canvas.getContext('2d');
+  const width=canvas.clientWidth,height=canvas.clientHeight;
+  canvas.width=Math.round(width*2);canvas.height=Math.round(height*2);
+  const paper=dialog.querySelector('.processing-paper');
+  const scale=parseFloat(getComputedStyle(paper).scale)||1;
+  const pw=paper.offsetWidth*scale,ph=paper.offsetHeight*scale;
   const start=performance.now();
   const random=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);};
   function draw(now){
     const t=Math.min(1,(now-start)/1050),ease=1-Math.pow(1-t,3);
-    ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,420,330);
+    ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,width,height);
     for(let i=0;i<640;i++){
-      const tx=135+random(i+1)*150,ty=58+random(i+700)*210;
-      const x=tx+(random(i+1400)-.5)*340*(1-ease),y=ty-(100+random(i+2100)*160)*(1-ease);
-      ctx.fillStyle=i%5===0?`rgba(255,245,230,${.9-t*.3})`:`rgba(242,176,165,${.8-t*.3})`;
-      ctx.beginPath();ctx.arc(x,y,.6+random(i+2800)*1.3,0,Math.PI*2);ctx.fill();
+      // Begin on the paper, then scatter radially with a little individual drift.
+      const px=(random(i+1)-.5)*pw,py=(random(i+700)-.5)*ph;
+      const rotation=-8*Math.PI/180;
+      const sx=px*Math.cos(rotation)-py*Math.sin(rotation);
+      const sy=px*Math.sin(rotation)+py*Math.cos(rotation);
+      const angle=Math.atan2(sy,sx)+(random(i+1400)-.5)*.8;
+      const distance=65+random(i+2100)*155;
+      const x=width/2+sx+Math.cos(angle)*distance*ease;
+      const y=height/2+sy+Math.sin(angle)*distance*ease+22*t*t;
+      const alpha=Math.pow(1-t,1.6);
+      ctx.fillStyle=i%5===0?`rgba(255,245,230,${.9*alpha})`:`rgba(242,176,165,${.8*alpha})`;
+      ctx.beginPath();ctx.arc(x,y,(.6+random(i+2800)*1.3)*(1-t*.45),0,Math.PI*2);ctx.fill();
     }
     if(t<1 && visible && !reduced.matches)animation=requestAnimationFrame(draw);
   }
