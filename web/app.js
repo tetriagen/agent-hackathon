@@ -1,3 +1,4 @@
+import { setupReviewSteps, refreshSteps, showReviewStep, showReviewTab } from './review-steps.js';
 import { beginProcessing, finishProcessing, failProcessing } from './processing.js';
 import { answer, draftLetter, draftInsuranceLetter } from './core.mjs';
 import { parseDocument } from './document-parser.mjs';
@@ -34,7 +35,15 @@ function invalidate() {
   $('result').hidden = true;
   $('confirmed').checked = false;
   draft = '';
+  $('letter').textContent = '';
+  refreshSteps();
   $('payload').textContent = JSON.stringify(facts(), null, 2);
+}
+
+function clearAI(kind) {
+  $(`${kind}-ai-result`).replaceChildren();
+  $(`${kind}-letter`).replaceChildren();
+  $('findings-confirmed').checked = false;
 }
 
 function suggest(kind) {
@@ -80,7 +89,7 @@ for (const kind of ['estimate', 'bill']) {
     $(`${kind}-amount`).value = '';
     $(`${kind}-evidence`).textContent = '';
     $(`${kind}-parsed`).replaceChildren();
-    $(`${kind}-ai-result`).replaceChildren();
+    clearAI(kind);
     $(`${kind}-ai-consent`).checked = false;
     ocrUsed[kind] = false;
     invalidate();
@@ -107,18 +116,19 @@ for (const kind of ['estimate', 'bill']) {
     $(`${kind}-amount`).value = '';
     $(`${kind}-evidence`).textContent = 'Text changed. Find the total again or enter it manually.';
     $(`${kind}-parsed`).replaceChildren();
-    $(`${kind}-ai-result`).replaceChildren();
+    clearAI(kind);
     $(`${kind}-ai-consent`).checked = false;
   });
 }
 
 document.querySelectorAll('[data-suggest]').forEach(button => button.addEventListener('click', () => suggest(button.dataset.suggest)));
-$('review-form').addEventListener('input', event => { if (event.target.id !== 'confirmed') invalidate(); });
-$('review-form').addEventListener('change', event => { if (event.target.id !== 'confirmed') invalidate(); });
+for (const type of ['input', 'change']) $('review-form').addEventListener(type, event => {
+  if (['estimate-text', 'bill-text', 'estimate-amount', 'bill-amount', 'payment-type', 'same-provider', 'estimate-received', 'within-window'].includes(event.target.id)) invalidate();
+});
 
 $('demo').addEventListener('click', () => {
   $('review-form').reset();
-  for (const kind of ['estimate', 'bill']) $(`${kind}-ai-result`).replaceChildren();
+  for (const kind of ['estimate', 'bill']) clearAI(kind);
   ocrUsed.estimate = false; ocrUsed.bill = false;
   $('estimate-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nGood faith estimate\nOffice procedure: $900.00\nTotal estimated cost: $900.00';
   $('bill-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nMedical bill\nOffice procedure: $1,650.00\nTotal charges: $1,650.00';
@@ -126,7 +136,8 @@ $('demo').addEventListener('click', () => {
   $('payment-type').value = 'self_pay';
   for (const id of ['same-provider', 'estimate-received', 'within-window']) $(id).value = 'yes';
   invalidate();
-  document.querySelector('.comparison-panel').scrollIntoView({ block: 'start' });
+  showReviewTab('selfpay');
+  showReviewStep('verify');
   notice('Synthetic example loaded. The answers are sample assumptions; inspect and confirm them.');
 });
 
@@ -138,17 +149,19 @@ $('reset').addEventListener('click', () => {
   for (const kind of ['estimate', 'bill']) {
     $(`${kind}-evidence`).textContent = '';
     $(`${kind}-parsed`).replaceChildren();
-    $(`${kind}-ai-result`).replaceChildren();
+    clearAI(kind);
     $(`${kind}-ai-consent`).checked = false;
     ocrUsed[kind] = false;
   }
   invalidate();
+  showReviewTab('findings');
+  showReviewStep('read');
   notice('Case cleared.');
 });
 
 $('review-form').addEventListener('submit', async event => {
   event.preventDefault();
-  if (reading || controller) return;
+  if (reading || controller || $('step-verify').hidden || $('panel-selfpay').hidden) return;
   for (const kind of ['estimate', 'bill']) {
     const type = parseDocument($(`${kind}-text`).value).type;
     if (['eob', 'educational_example'].includes(type) || (kind === 'bill' && type === 'good_faith_estimate') || (kind === 'estimate' && type === 'medical_bill')) {
@@ -178,6 +191,7 @@ $('review-form').addEventListener('submit', async event => {
     draft = draftLetter(result);
     $('letter').textContent = draft;
     $('result').hidden = false;
+    refreshSteps();
     $('result-title').focus();
     notice('Comparison complete. No complaint has been sent.');
   } catch (error) {
@@ -188,6 +202,7 @@ $('review-form').addEventListener('submit', async event => {
     $('notice').classList.remove('busy');
     $('controls').disabled = reading > 0;
     $('demo').disabled = reading > 0;
+    refreshSteps();
   }
 });
 
@@ -251,7 +266,7 @@ function renderInsuranceLetter(box, result, prepared) {
     status.textContent = 'Download requested. Review your details before sending the letter.';
   });
   section.append(title, note, label, editor, copy, download, status);
-  box.append(section);
+  $(`${box.id.split('-')[0]}-letter`).append(section);
 }
 
 function renderConsistency(box, result) {
@@ -339,8 +354,9 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
   if (!$(`${kind}-ai-consent`).checked) { notice(`Confirm sending this original PDF to ${aiProviderLabel} first.`, true); $(`${kind}-ai-consent`).focus(); return; }
   if (file.size > 10 * 1024 * 1024) { notice('Choose a PDF up to 10 MB.', true); return; }
   if (reading || controller) return;
+  clearAI(kind);
+  refreshSteps();
   const box = $(`${kind}-ai-result`);
-  box.replaceChildren();
   const local = parseDocument($(`${kind}-text`).value, {usedOCR:ocrUsed[kind]});
   reading++;
   $('controls').disabled = true; $('demo').disabled = true; $('reset').disabled = true;
@@ -373,7 +389,10 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
       if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`AI source excerpt (verify): ${field.evidence}`; extractionDetails.append(source); }
     }
     for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;extractionDetails.append(p); }
+    refreshSteps();
     await finishProcessing('Your findings are ready to verify.');
+    showReviewTab('findings');
+    showReviewStep('verify');
     notice(`${data.consistency?.status === 'review_needed' ? 'Potential payment mismatch found. ' : ''}AI review complete. Review the source PDF. AI values have not changed the confirmed facts below.`);
   } catch (error) { failProcessing(); notice(error.name === 'AbortError' ? 'AI request timed out. Local rules still work.' : error.message, true); }
   finally { clearTimeout(timeout); reading--; $('notice').classList.remove('busy'); $('controls').disabled=false; $('demo').disabled=false; $('reset').disabled=false; }
@@ -398,4 +417,5 @@ async function configureAI() {
     document.querySelectorAll('[data-ai]').forEach(button => {button.disabled=false;});
   } catch { $('ai-privacy').textContent = 'Could not check AI availability. Local reading still works.'; }
 }
+setupReviewSteps(() => reading > 0 || Boolean(controller));
 configureAI();

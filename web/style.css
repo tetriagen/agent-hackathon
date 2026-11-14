@@ -24,7 +24,14 @@ fieldset{margin:0;padding:0;border:0;min-width:0} .file-guidance{font-size:13px;
 @media(max-width:767px){.wrap{width:calc(100% - 40px)}.site-header{height:72px}.nav-inner{gap:16px}nav{gap:16px}.header-note{display:none}.brand{font-size:22px}.hero{padding-top:40px;min-height:calc(100svh - 72px)}.hero-top{grid-template-columns:1fr;gap:24px}h1{font-size:clamp(38px,7vw,52px)}.hero-intro>p:first-child{max-width:45ch}.hero-fact{margin-top:12px}.hero-bottom{font-size:12px;gap:16px}.hero-bottom a{flex:none}.workspace{padding-block:48px}.section-heading{gap:24px;margin-bottom:24px}.workflow li{font-size:12px;gap:8px}.columns{grid-template-columns:1fr}.comparison-panel{grid-template-columns:1fr;gap:24px;margin-top:40px;padding-top:40px}.comparison-intro{max-width:none}.comparison-intro h2{margin-bottom:16px}.privacy-panel{padding-left:16px}.document-card{padding:20px}.result-panel{padding:24px}.site-footer{display:grid;gap:12px}.workspace-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.workspace-actions button{font-size:13px;padding:12px}button,.btn{max-width:100%}.hero .btn{width:100%}.hero-bottom{padding-bottom:20px}.check{font-size:13px}.ai-heading span{white-space:normal}}
 @media(max-width:359px){nav a{font-size:12px}.nav-inner{gap:8px}nav{gap:12px}.workflow{grid-template-columns:1fr}.workflow li{padding:10px}.document-card{padding:16px}.upload-area{padding:16px}.workspace-actions{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-@media print{ :root{color-scheme:light;background:white;color:black}body>.site-header,body>.skip-link,body>.site-footer,main>:not(#result),#result>:not(#letter){display:none!important}#result{width:100%;margin:0;border:0;padding:0;background:white}#letter{background:white;color:black;border:0;padding:0} }
+@media print{
+ :root,body.review-page{color-scheme:light;background:white;color:black}
+ body>.site-header,body>.skip-link,body>.site-footer,body>dialog,
+ #workspace>:not(#review-form),#controls>:not(#step-letter),
+ #step-letter>:not(#selfpay-letter),#selfpay-letter>:not(#letter){display:none!important}
+ .review-page #workspace,.review-page #review-form,.review-page #controls,.review-page #step-letter,.review-page #selfpay-letter{width:100%;max-width:none;margin:0;padding:0;border:0;background:white}
+ .review-page #step-letter #letter{background:white;color:black;border:0;padding:0}
+}
 #notice.busy{border-color:var(--action)}
 #notice.busy::before{content:"";display:inline-block;width:10px;height:10px;border:2px solid #42546c;border-top-color:var(--action);border-radius:50%;margin-right:10px;animation:busy-spin 1s linear infinite}
 @keyframes busy-spin{to{transform:rotate(360deg)}}
@@ -51,3 +58,30 @@ fieldset{margin:0;padding:0;border:0;min-width:0} .file-guidance{font-size:13px;
 .review-page .document-card{background:linear-gradient(135deg,#1e1918,#121010);border-color:#423431;border-radius:20px}.review-page .document-number{color:#efb3a6;background:#f2b0a50b;border-color:#6b4b43}.review-page .document-heading h3{font-family:Georgia,serif;font-size:27px;font-weight:400}.review-page .upload-area{background:#0e0c0c;border-color:#69534c;border-radius:14px}.review-page .upload-area:hover,.review-page .upload-area:focus-within{background:#241916;border-color:#f2b0a5}.review-page .upload-symbol{color:#f2b0a5}
 .review-page button,.review-page .btn{background:#2c211e;border-color:#634b43;border-radius:24px}.review-page button:hover,.review-page .btn:hover{background:#44312a;border-color:#b08678}.review-page #analyze,.review-page .btn--primary{background:#f2b0a5;color:#231613;border-color:#f2b0a5}.review-page #analyze:hover{background:#f9c5bc}
 .review-page input:not([type=checkbox]):not([type=file]),.review-page textarea,.review-page select{background:#0e0b0b;border-color:#69534c;color:#f5eee8}.review-page input[type=file]::file-selector-button{background:#392821;border-color:#79584b;border-radius:20px;color:#f4e6df}.review-page .ai-heading span{color:#e9b7a6;border-color:#6b4b43}.review-page .privacy-panel{border-color:#bd8b7b}.review-page #notice{background:#211816;border-color:#62493f;color:#eacec3}.review-page #notice.error{background:#361c1c;border-color:#a65a50;color:#ffc6ba}.review-page pre{background:#110e0d;border-color:#493932}.review-page .result-panel{border-color:#946c5d;background:#1a1412}.review-page .check{color:#ccbbb4}.review-page .workflow li{color:#b3a6a0}.review-page .workflow li:first-child{color:#f2b0a5}.review-page .comparison-intro h2{font-family:Georgia,serif}.review-page #difference{color:#f2b0a5}
+
+/* Focused review: one step and one review mode at a time. */
+.review-page [hidden]{display:none!important}
+.review-page .workflow{scroll-margin-top:24px}
+.review-page .workflow li,.review-page .workflow li:first-child{opacity:1;color:#9f918b;border-bottom:2px solid transparent;transition:color .2s}
+.review-page .workflow li[aria-current="step"]{opacity:1;color:#f2b0a5;border-bottom-color:#f2b0a5}
+.review-page .review-step>h2{font:normal clamp(32px,4vw,48px)/1.1 Georgia,serif;letter-spacing:-1.5px;margin:20px 0 28px}
+.review-page .step-actions{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid #ffffff20;margin-top:32px;padding-top:24px}
+.review-page .step-actions>span{color:#b9aaa4;font-size:14px}
+.review-page .review-tabs{display:flex;gap:8px;margin-bottom:28px;border-bottom:1px solid #ffffff20;padding-bottom:12px}
+.review-page .review-tabs button{background:transparent;color:#b9aaa4;border:1px solid transparent;border-radius:30px;padding:12px 20px}
+.review-page .review-tabs button[aria-selected="true"]{background:#f2b0a5;color:#2b201e}
+.review-page .finding-document{padding:24px 0;border-bottom:1px solid #ffffff20}
+.review-page .finding-document>h3{color:#f2b0a5}
+.review-page #panel-selfpay .comparison-panel{margin-top:0;padding-top:0;border-top:0}
+.review-page #panel-selfpay .comparison-intro .eyebrow{display:none}
+.review-page #result{width:100%;margin:28px 0 0}
+.review-page #step-letter{max-width:900px;margin:auto}
+.review-page #step-letter pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#fff9ef;color:#302723;padding:clamp(20px,4vw,40px);border-radius:12px;line-height:1.7}
+.review-page #step-letter textarea{min-height:420px}
+.review-page #step-letter .insurance-letter{margin-top:24px}
+@media(max-width:600px){.review-page .step-actions{flex-wrap:wrap}.review-page .step-actions button{width:100%}.review-page .review-tabs button{flex:1;padding:12px 8px;font-size:14px}.review-page .workflow{gap:8px}.review-page .workflow li{font-size:12px}.review-page .comparison-panel{display:block}}
+.review-page:not([data-review-step="read"]) .section-heading .eyebrow,
+.review-page:not([data-review-step="read"]) .section-heading .section-lead{display:none}
+.review-page:not([data-review-step="read"]) #workspace-title{font-size:28px;letter-spacing:-1px}
+.review-page:not([data-review-step="read"]) .workspace{padding-top:32px}
+@media(prefers-reduced-motion:reduce){.review-page .workflow li{transition:none}}

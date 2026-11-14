@@ -69,3 +69,9 @@ Local file reading and optional consented AI extraction open a native modal with
 The review page now shares the landing's black / warm paper / rose palette and serif headings. The landing hero is no longer sticky and has no extra animation scroll runway: it moves with ordinary scrolling, while document gathering follows progress in parallel.
 
 Verified in Chromium: minimum successful presentation time, completion phase, malformed-PDF error recovery, reduced-motion fast completion, hide action, 390 px modal screenshot and ordinary hero movement of 250 px for 250 px scroll. Mocked AI extraction also retains the combined editable letter. Tests use synthetic documents and fixtures; no paid AI calls.
+
+### Separate review steps
+
+The review now shows one step at a time: read documents, verify findings, prepare a letter. Verification has keyboard-accessible Document findings and Self-pay comparison tabs. Local extraction and AI findings appear in verification; drafts only appear on the letter step. AI drafts require a source-check confirmation before continuing. Self-pay comparison must succeed before its Next button enables. Navigation preserves edits; replacing a document clears its AI draft, and changing comparison facts clears its self-pay draft. Printing still targets only the self-pay letter. Later steps use a compact page header.
+
+Verified desktop/mobile navigation, empty state, keyboard tabs, self-pay success and invalidation, mocked AI findings/confirmation/draft editing/document replacement, comparison error recovery, and print visibility. No live AI requests were used. Client tests, JavaScript syntax and diff whitespace checks pass.
