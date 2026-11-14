@@ -81,3 +81,7 @@ Verified desktop/mobile navigation, empty state, keyboard tabs, self-pay success
 Replaced per-document AI consent and review buttons with one shared consent and one Review with AI action below the upload cards. The selected PDF filenames are listed before consent; text files and pasted text remain local. Original PDFs are processed sequentially with one loading animation and separate findings per document. Changing a file or its text clears shared consent. Partial failures retain completed findings and state how many PDFs were reviewed.
 
 Browser verification used mocked responses: consent gating, two PDFs, a single PDF alongside a text file, replacement consent reset, partial failure, desktop/mobile layout, and no runtime exceptions. No live AI requests were sent.
+
+### Optional estimate and review-only polish
+
+Bill/EOB is the primary upload. The estimate is a native disclosure with an added-file label; hiding it never clears its data or excludes it from shared AI review. Demo and reset manage its expanded state. All parsing, comparison and letter-generation rules are unchanged. Review-only polish reduces introductory clutter, aligns content, flattens upload borders, pairs comparison questions on desktop, and improves paper-letter typography. Landing remains unchanged by explicit request. See REVIEW-DESIGN-AUDIT.md for skill checks, exceptions and browser/test evidence.

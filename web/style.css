@@ -85,3 +85,78 @@ fieldset{margin:0;padding:0;border:0;min-width:0} .file-guidance{font-size:13px;
 .review-page:not([data-review-step="read"]) #workspace-title{font-size:28px;letter-spacing:-1px}
 .review-page:not([data-review-step="read"]) .workspace{padding-top:32px}
 @media(prefers-reduced-motion:reduce){.review-page .workflow li{transition:none}}
+.review-page .document-upload-flow{max-width:860px;margin-inline:auto}
+.review-page .optional-estimate{border-block:1px solid #ffffff20;margin-top:20px}
+.review-page .optional-estimate>summary{padding:20px 4px;font-size:15px;color:#eac5b9}
+.review-page .optional-estimate>summary .note{display:block;margin:6px 0 0 20px;overflow-wrap:anywhere}
+.review-page .optional-estimate>summary .note:empty{display:none}
+.review-page .optional-estimate[open]{padding-bottom:20px}
+.review-page .optional-estimate>p{padding-inline:4px}
+.review-page .optional-estimate .document-card{margin-top:16px}
+
+/* Review audit: keep the task close to the top, within one consistent column. */
+.review-page{--review-paper:#fff9ef;--review-paper-ink:#302723;--review-accent:#f2b0a5;--review-muted:#c7b9b2;--muted:var(--review-muted);caret-color:var(--review-accent)}
+.review-page ::selection{background:var(--review-accent);color:#30201c}
+.review-page .workspace{width:min(960px,calc(100% - 96px));padding-top:32px;padding-bottom:56px}
+.review-page .section-heading{gap:20px;align-items:start;margin-bottom:20px}
+.review-page #workspace-title{font-size:clamp(32px,3.8vw,48px);letter-spacing:-.035em;line-height:1.12}
+.review-page .section-lead{margin-top:12px;max-width:48ch}
+.review-page .workspace-actions{flex:none;gap:8px}
+.review-page .workspace-actions button{min-height:44px;padding:8px 12px;font-size:13px;background:transparent}
+.review-page .workflow{margin-bottom:20px}
+.review-page .workflow li{padding-block:12px}
+.review-page .privacy-panel{border-left:0;padding:0;margin-bottom:20px}
+.review-page .privacy-heading{margin-bottom:4px}
+.review-page .privacy-panel a{color:#eac5b9;text-decoration:underline;text-underline-offset:4px}
+.review-page #notice:empty{display:none}
+.review-page #notice{margin:16px 0}
+.review-page .document-upload-flow{max-width:none}
+.review-page .document-card{padding:24px;background:#141110}
+.review-page .document-heading{margin-bottom:16px}
+.review-page .document-heading h2{font:normal 26px/1.2 Georgia,serif;letter-spacing:-.025em}
+.review-page .document-heading p{margin-top:6px}
+.review-page .upload-area{padding:20px;margin-bottom:16px}
+.review-page .upload-symbol{margin-bottom:8px;font-size:28px}
+.review-page .text-details{margin:0;border-bottom:0}
+.review-page .file-guidance{margin-bottom:12px}
+.review-page .shared-ai{margin-top:24px;padding-top:20px}
+.review-page .step-actions{margin-top:24px;padding-top:20px}
+.review-page .review-step>h2{margin-top:12px}
+.review-page .finding-document p,.review-page .finding-document li{overflow-wrap:anywhere}
+.review-page .finding-document dl{font-variant-numeric:tabular-nums}
+.review-page .finding-document dd{margin-inline-start:0;color:var(--review-muted);margin-bottom:16px}
+.review-page .finding-document dt{font-weight:600}
+.review-page #step-letter pre,.review-page #step-letter textarea{background:var(--review-paper);color:var(--review-paper-ink);font:15px/1.75 var(--font-text);letter-spacing:normal;caret-color:#7a3d32}
+.review-page #step-letter textarea{padding:24px;border-color:#d6c6b8}
+.review-page #step-letter button{margin-bottom:8px}
+.review-page #difference{font-variant-numeric:tabular-nums}
+@media(max-width:767px){
+ .review-page .workspace{width:calc(100% - 40px);padding-top:24px}
+ .review-page .section-heading{display:block;margin-bottom:12px}
+ .review-page .workspace-actions{display:flex;width:auto;justify-content:start;margin-top:12px}
+ .review-page .workspace-actions button{font-size:12px;padding:8px 12px}
+ .review-page .workflow li{gap:6px;font-size:12px}
+ .review-page .document-card{padding:16px}
+ .review-page .document-heading h2{font-size:23px}
+ .review-page .upload-area{padding:16px}
+ .review-page .document-heading p{font-size:14px}
+ .review-page .comparison-fields .columns{gap:12px}
+ .review-page .step-actions>span{display:none}
+ .review-page #step-letter textarea{padding:16px}
+ .review-page #step-letter button{width:100%}
+}
+.review-page .document-upload-flow .document-card{padding:0;border:0;border-radius:0;background:transparent}
+.review-page .document-upload-flow .upload-area{background:#141110}
+.review-page .workspace-actions button,.review-page .workspace-actions #reset{background:#2c211e;border-color:#634b43;color:var(--review-muted)}
+.review-page .workspace-actions button:hover{background:#3a2a24;border-color:#a97968;color:#fff9ef}
+.review-page #panel-selfpay .comparison-panel{display:block}
+.review-page .comparison-intro{max-width:65ch;margin-bottom:24px}
+.review-page .comparison-intro h2{font-size:28px;margin-bottom:12px}
+.review-page .comparison-questions{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+.review-page .comparison-questions>div{display:flex;flex-direction:column;min-width:0}
+.review-page .comparison-questions label{flex:1}
+.review-page #result-title{font:normal 28px/1.2 Georgia,serif;letter-spacing:-.025em}
+.review-page #result{padding:24px}
+.review-page .site-footer{width:min(960px,calc(100% - 96px))}
+@media(max-width:767px){.review-page .comparison-questions{grid-template-columns:1fr}.review-page .site-footer{width:calc(100% - 40px)}}
+@media(max-width:359px){.review-page .workflow{grid-template-columns:repeat(3,minmax(0,1fr))}.review-page .workflow li{display:block;padding:10px 0;font-size:11px}.review-page .workflow span{display:block;margin-bottom:4px}.review-page .workspace-actions button{font-size:11px;padding-inline:8px}}

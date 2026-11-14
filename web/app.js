@@ -38,6 +38,7 @@ function invalidate() {
   $('letter').textContent = '';
   refreshSteps();
   $('payload').textContent = JSON.stringify(facts(), null, 2);
+  updateAISelection();
 }
 
 function clearAI(kind) {
@@ -137,6 +138,7 @@ $('demo').addEventListener('click', () => {
   $('payment-type').value = 'self_pay';
   for (const id of ['same-provider', 'estimate-received', 'within-window']) $(id).value = 'yes';
   invalidate();
+  $('optional-estimate').open = true;
   showReviewTab('selfpay');
   showReviewStep('verify');
   notice('Synthetic example loaded. The answers are sample assumptions; inspect and confirm them.');
@@ -158,6 +160,7 @@ $('reset').addEventListener('click', () => {
   invalidate();
   showReviewTab('findings');
   showReviewStep('read');
+  $('optional-estimate').open = false;
   notice('Case cleared.');
 });
 
@@ -353,6 +356,8 @@ function selectedPDFs() {
     .filter(({file}) => file && /\.pdf$/i.test(file.name));
 }
 function updateAISelection() {
+  const estimateFile = $('estimate-file').files[0];
+  $('estimate-added').textContent = estimateFile ? `Added: ${estimateFile.name}` : $('estimate-text').value.trim() ? 'Estimate text added' : '';
   const selected = selectedPDFs();
   $('ai-selection').textContent = selected.length
     ? `PDFs for review: ${selected.map(({file}) => file.name).join(' · ')}. Text files and pasted text are not sent.`
