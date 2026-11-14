@@ -15,19 +15,18 @@
   <link rel="stylesheet" href="/assets/motion/motion.css">
   <script src="/entrance.js"></script>
   <script type="module" src="/assets/motion/motion.js"></script>
-  <script type="module" src="/app.js"></script>
   <link rel="stylesheet" href="/medical-orbit.css">
   <link rel="stylesheet" href="/bill-hero.css">
   <script type="module" src="/bill-hero.js"></script>
   <script type="module" src="/review-navigation.js"></script>
   <script type="module" src="/medical-orbit.js"></script>
 </head>
-<body>
+<body class="landing-page">
 <!-- Reference-directed hero: oversized editorial type and a field of document cards; ClearBill-specific artwork and copy. -->
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap nav-inner">
   <a class="brand" href="#main" aria-label="ClearBill home"><span class="brand-mark" aria-hidden="true">+</span>ClearBill<span class="brand-period">.</span></a>
-  <nav aria-label="Main navigation"><a href="#workspace" data-open-review>Check your bill</a><a href="#privacy">Your privacy</a></nav>
+  <nav aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="/review.html">Check your bill</a><a href="#privacy">Your privacy</a></nav>
   <span class="header-note"><span class="status-dot" aria-hidden="true"></span>Medical bill review</span>
 </div></header>
 <main id="main">
@@ -37,84 +36,22 @@
       <div class="bill-universe" aria-hidden="true"><div class="bill-float bill-float-0"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>01</span></div><div class="paper-rule"></div><p class="paper-kicker">Patient documents</p><h3>Medical bill</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Total amount</p><p class="paper-amount">$1,650.00</p><div class="paper-table"><div class="paper-row"><span>Office procedure</span><b>$900.00</b></div><div class="paper-row"><span>Additional charges</span><b>$750.00</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-bill"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div><div class="bill-float bill-float-1"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>02</span></div><div class="paper-rule"></div><p class="paper-kicker">Insurance statement</p><h3>Explanation of benefits</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Payment distribution</p><p class="paper-amount">$53.83</p><div class="paper-table"><div class="paper-row"><span>Reported payment</span><b>$43.06</b></div><div class="paper-row"><span>Distribution total</span><b>$53.83</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-eob"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div><div class="bill-float bill-float-2"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>03</span></div><div class="paper-rule"></div><p class="paper-kicker">Patient documents</p><h3>Good faith estimate</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Total amount</p><p class="paper-amount">$900.00</p><div class="paper-table"><div class="paper-row"><span>Office procedure</span><b>$900.00</b></div><div class="paper-row"><span>Estimated total</span><b>$900.00</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-estimate"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div><div class="bill-float bill-float-3"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>04</span></div><div class="paper-rule"></div><p class="paper-kicker">Patient documents</p><h3>Medical bill</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Total amount</p><p class="paper-amount">$1,650.00</p><div class="paper-table"><div class="paper-row"><span>Office procedure</span><b>$900.00</b></div><div class="paper-row"><span>Additional charges</span><b>$750.00</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-bill"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div><div class="bill-float bill-float-4"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>05</span></div><div class="paper-rule"></div><p class="paper-kicker">Insurance statement</p><h3>Explanation of benefits</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Payment distribution</p><p class="paper-amount">$53.83</p><div class="paper-table"><div class="paper-row"><span>Reported payment</span><b>$43.06</b></div><div class="paper-row"><span>Distribution total</span><b>$53.83</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-eob"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div><div class="bill-float bill-float-5"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>06</span></div><div class="paper-rule"></div><p class="paper-kicker">Patient documents</p><h3>Good faith estimate</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Total amount</p><p class="paper-amount">$900.00</p><div class="paper-table"><div class="paper-row"><span>Office procedure</span><b>$900.00</b></div><div class="paper-row"><span>Estimated total</span><b>$900.00</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-estimate"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div><div class="bill-float bill-float-6"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>07</span></div><div class="paper-rule"></div><p class="paper-kicker">Patient documents</p><h3>Medical bill</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Total amount</p><p class="paper-amount">$1,650.00</p><div class="paper-table"><div class="paper-row"><span>Office procedure</span><b>$900.00</b></div><div class="paper-row"><span>Additional charges</span><b>$750.00</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-bill"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div><div class="bill-float bill-float-7"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>08</span></div><div class="paper-rule"></div><p class="paper-kicker">Insurance statement</p><h3>Explanation of benefits</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Payment distribution</p><p class="paper-amount">$53.83</p><div class="paper-table"><div class="paper-row"><span>Reported payment</span><b>$43.06</b></div><div class="paper-row"><span>Distribution total</span><b>$53.83</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-eob"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div><div class="bill-float bill-float-8"><div class="paper-front"><div class="paper-top"><span class="pdf-stamp">PDF</span><span>ClearBill / Demo</span><span>09</span></div><div class="paper-rule"></div><p class="paper-kicker">Patient documents</p><h3>Good faith estimate</h3><div class="paper-lines"><i></i><i></i></div><p class="paper-caption">Total amount</p><p class="paper-amount">$900.00</p><div class="paper-table"><div class="paper-row"><span>Office procedure</span><b>$900.00</b></div><div class="paper-row"><span>Estimated total</span><b>$900.00</b></div></div><div class="paper-foot"><span>Synthetic illustration</span><span>1 / 1</span></div></div><div class="paper-back paper-back-estimate"><span>+</span><p>ClearBill.</p><small>Every detail matters.</small></div></div></div>
       <div class="gather-folder" aria-hidden="true"><svg viewBox="0 0 80 60" fill="none" aria-hidden="true"><path d="M5 14a5 5 0 0 1 5-5h20l8 8h32a5 5 0 0 1 5 5v29a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5Z" fill="currentColor"/><path d="M5 26h70" stroke="#201717" stroke-opacity=".2" stroke-width="2"/></svg></div><button class="motion-toggle" type="button" aria-pressed="false" aria-label="Pause decorative animation">Pause motion</button>
       <div class="stage-side stage-side-left">Your bills. A closer look.</div><div class="stage-side stage-side-right">Scroll to sort ↓</div>
-      <div class="bill-hero-action"><p>Extra charges can hide in the details.<br>Check your medical bill before you pay.</p><a class="btn btn--primary" href="#workspace" data-open-review><span class="cta-cross" aria-hidden="true"><svg viewBox="0 0 80 60" fill="none" aria-hidden="true"><path d="M5 14a5 5 0 0 1 5-5h20l8 8h32a5 5 0 0 1 5 5v29a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5Z" fill="currentColor"/><path d="M5 26h70" stroke="#201717" stroke-opacity=".2" stroke-width="2"/></svg><svg class="folder-lens" viewBox="0 0 32 32" fill="none"><circle cx="13" cy="13" r="8" fill="#fce0d7" fill-opacity=".65" stroke="#fff5ee" stroke-width="3"/><path d="m19 19 9 9" stroke="#fff5ee" stroke-width="4" stroke-linecap="round"/></svg></span> Check your bill <span aria-hidden="true">↗</span></a><span class="hero-small">No account needed · PDF or text</span></div>
+      <div class="bill-hero-action"><p>Extra charges can hide in the details.<br>Check your medical bill before you pay.</p><a class="btn btn--primary" href="/review.html"><span class="cta-cross" aria-hidden="true"><svg viewBox="0 0 80 60" fill="none" aria-hidden="true"><path d="M5 14a5 5 0 0 1 5-5h20l8 8h32a5 5 0 0 1 5 5v29a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5Z" fill="currentColor"/><path d="M5 26h70" stroke="#201717" stroke-opacity=".2" stroke-width="2"/></svg><svg class="folder-lens" viewBox="0 0 32 32" fill="none"><circle cx="13" cy="13" r="8" fill="#fce0d7" fill-opacity=".65" stroke="#fff5ee" stroke-width="3"/><path d="m19 19 9 9" stroke="#fff5ee" stroke-width="4" stroke-linecap="round"/></svg></span> Check your bill <span aria-hidden="true">↗</span></a><span class="hero-small">No account needed · PDF or text</span></div>
     </div>
   </section>
-  <section id="workspace" hidden class="workspace wrap" aria-labelledby="workspace-title">
-    <div class="section-heading"><div><p class="eyebrow">Your review workspace</p><h2 id="workspace-title">Start with the paperwork.</h2><p class="section-lead">Upload an EOB on its own, or compare an estimate with a bill.</p></div>
-      <div class="workspace-actions"><button class="btn btn--secondary" type="button" id="demo">Try a synthetic example</button><button class="btn btn--secondary" type="button" id="reset">Clear this case</button></div>
+  <section class="overview-section wrap" id="how-it-works" aria-labelledby="overview-title">
+    <p class="eyebrow">A medical bill should make sense.</p><h2 id="overview-title">See the details.<br>Know what to ask.</h2>
+    <div class="overview-lead"><p>Between a provider’s bill and an insurance explanation, it can be hard to see how the numbers fit together. ClearBill helps you review the details and prepare a written request for answers.</p><a class="btn btn--primary" href="/review.html">Check your bill ↗</a></div>
+    <div class="benefit-rows">
+      <article><span class="benefit-number">01 / Compare</span><h3>Check totals that don’t add up.</h3><p>Compare reported payments with their breakdown. See the difference and the source amounts to verify in your PDF.</p></article>
+      <article><span class="benefit-number">02 / Review</span><h3>Look for repeated services.</h3><p>Find extracted rows with matching dates, service codes, quantities and charges. Check whether they represent separate services or a possible duplicate.</p></article>
+      <article><span class="benefit-number">03 / Ask</span><h3>Leave with a letter ready to edit.</h3><p>Turn findings into a request for clarification. Add your details, download the draft and send it when you’re ready.</p></article>
     </div>
-    <ol class="workflow" aria-label="Review process"><li><span>01</span> Read documents</li><li><span>02</span> Verify findings</li><li><span>03</span> Prepare a letter</li></ol>
-    <div id="privacy" class="privacy-panel"><div class="privacy-heading"><span aria-hidden="true">↗</span><strong>You choose what leaves your browser.</strong></div><p>Local reading stays on your device. Comparing amounts sends only the confirmed facts. Optional AI review sends the original PDF, including personal information, to our server and <span class="ai-provider">the configured AI provider</span>. Page contents are cleared on reload.</p><p id="ai-privacy" class="note" aria-live="polite"></p></div>
-    <p id="notice" role="status" aria-live="polite">Start with a document, paste text, or enter the amounts manually.</p>
-  <form id="review-form">
-    <fieldset id="controls">
-      <legend class="sr-only">Read documents and confirm your facts</legend>
-      <p class="file-guidance">PDF or .txt · 30 pages maximum · English OCR for up to 5 scanned pages. Verify recognized amounts.</p>
-      <div class="columns">
-        <section class="document-card" aria-labelledby="estimate-title">
-          <div class="document-heading"><span class="document-number">01</span><div><h3 id="estimate-title">Your estimate</h3><p>The amount you expected to pay.</p></div></div>
-          <div class="upload-area"><label for="estimate-file"><span class="upload-symbol" aria-hidden="true">↑</span>Choose estimate<span class="upload-hint">PDF or text, up to 10 MB</span></label><input id="estimate-file" name="estimate-file" type="file" accept=".pdf,.txt"></div>
-          <details class="text-details"><summary>Paste or inspect document text</summary><label for="estimate-text">Estimate text — stays in your browser</label>
-          <textarea id="estimate-text" rows="8" maxlength="100000" spellcheck="false" name="estimate-text"></textarea>
-          <button class="btn btn--secondary" type="button" data-suggest="estimate">Read document fields</button></details>
-          <p id="estimate-evidence" class="note"></p>
-          <div id="estimate-parsed" aria-live="polite"></div>
-          <div class="ai-controls"><p class="ai-heading">Optional AI review <span>Find inconsistencies</span></p><label class="check"><input id="estimate-ai-consent" type="checkbox" name="estimate-ai-consent"><span>I agree to send this original PDF to <span class="ai-provider">the configured AI provider</span> for extraction. It is not redacted; edits to the text above do not change the file.</span></label>
-          <button class="btn btn--secondary" type="button" data-ai="estimate" disabled>Review PDF with AI <span aria-hidden="true">↗</span></button></div>
-          <div id="estimate-ai-result" aria-live="polite"></div>
-        </section>
-        <section class="document-card" aria-labelledby="bill-title">
-          <div class="document-heading"><span class="document-number">02</span><div><h3 id="bill-title">Your bill or EOB</h3><p>The charges or insurance explanation you received.</p></div></div>
-          <div class="upload-area"><label for="bill-file"><span class="upload-symbol" aria-hidden="true">↑</span>Choose bill<span class="upload-hint">PDF or text, up to 10 MB</span></label><input id="bill-file" name="bill-file" type="file" accept=".pdf,.txt"></div>
-          <details class="text-details"><summary>Paste or inspect document text</summary><label for="bill-text">Bill text — stays in your browser</label>
-          <textarea id="bill-text" rows="8" maxlength="100000" spellcheck="false" name="bill-text"></textarea>
-          <button class="btn btn--secondary" type="button" data-suggest="bill">Read document fields</button></details>
-          <p id="bill-evidence" class="note"></p>
-          <div id="bill-parsed" aria-live="polite"></div>
-          <div class="ai-controls"><p class="ai-heading">Optional AI review <span>Find inconsistencies</span></p><label class="check"><input id="bill-ai-consent" type="checkbox" name="bill-ai-consent"><span>I agree to send this original PDF to <span class="ai-provider">the configured AI provider</span> for extraction. It is not redacted; edits to the text above do not change the file.</span></label>
-          <button class="btn btn--secondary" type="button" data-ai="bill" disabled>Review PDF with AI <span aria-hidden="true">↗</span></button></div>
-          <div id="bill-ai-result" aria-live="polite"></div>
-        </section>
-      </div>
-
-      <div class="comparison-panel"><div class="comparison-intro"><p class="eyebrow">Self-pay comparison</p><h2>Check the difference.</h2><p>For care paid without insurance, confirm your estimate and final bill below.</p></div><div class="comparison-fields">
-      <p>Rules recognize a limited set of labels. EOBs and teaching examples are shown separately and cannot be used as self-pay bills here. Unknown formats require manual entry.</p>
-      <div class="columns">
-        <div><label for="estimate-amount">Estimated amount (USD)</label><input id="estimate-amount" required inputmode="decimal" pattern="[0-9]{1,8}(\.[0-9]{1,2})?" placeholder="900.00" autocomplete="off" name="estimate-amount"></div>
-        <div><label for="bill-amount">Billed amount (USD)</label><input id="bill-amount" required inputmode="decimal" pattern="[0-9]{1,8}(\.[0-9]{1,2})?" placeholder="1650.00" autocomplete="off" name="bill-amount"></div>
-      </div>
-      <label for="payment-type">Did you use insurance for this care?</label>
-      <select id="payment-type" name="payment-type"><option value="unknown">Not sure</option><option value="self_pay">No — self-pay / uninsured</option><option value="insurance">Yes — insurance</option></select>
-      <label for="same-provider">Do both amounts belong to the same provider or facility?</label>
-      <select id="same-provider" name="same-provider"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select>
-      <label for="estimate-received">Did you receive a written good faith estimate before care?</label>
-      <select id="estimate-received" name="estimate-received"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select>
-      <label for="within-window">Is the date on your initial bill within the last 120 days?</label>
-      <select id="within-window" name="within-window"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select>
-
-      <details class="facts-details" open><summary>Review the facts sent for comparison</summary><pre id="payload"></pre></details>
-      <label class="check"><input type="checkbox" id="confirmed" required name="confirmed"> I checked the amounts and the data above.</label>
-      <button class="btn btn--primary" id="analyze" type="submit">Compare amounts <span aria-hidden="true">↗</span></button></div></div>
-    </fieldset>
-  </form>
-
   </section>
-  <section class="wrap result-panel" id="result" hidden aria-labelledby="result-title">
-    <h2 id="result-title" tabindex="-1"></h2>
-    <p id="difference"></p>
-    <p id="explanation"></p>
-    <ol id="next-steps"></ol>
-    <p id="limitation" class="note"></p>
-    <a id="source" target="_blank" rel="noopener noreferrer">Check the CMS requirements</a>
-    <h3>Draft request</h3>
-    <p>This is a request for an explanation, not a submitted complaint. Add your details after downloading.</p>
-    <pre id="letter"></pre>
-    <button type="button" id="download">Download draft (.txt)</button>
-    <button type="button" id="print">Print / save as PDF</button>
-  </section>
+  <section class="overview-privacy wrap" aria-labelledby="privacy-title"><div><p class="eyebrow">Your documents. Your decision.</p><h2 id="privacy-title">Start locally.<br>Choose when to use AI.</h2></div><div><p>Read PDF and text files in your browser. AI review is optional and requires your consent before the original PDF is sent.</p><p class="note">Findings need your review. ClearBill does not guarantee that a charge is wrong or that you are owed a refund.</p><a class="link" href="#privacy">Read how your documents are handled ↗</a></div></section>
+  <section class="overview-close wrap" aria-labelledby="close-title"><h2 id="close-title">A second look at your bill.</h2><p>No account needed. Upload a document or try a synthetic example.</p><a class="btn btn--primary" href="/review.html">Check your bill ↗</a></section>
 </main>
 <footer class="wrap site-footer"><a class="brand" href="#main">ClearBill<span class="brand-period">.</span></a><p>Questions about a bill deserve an explanation.</p><a href="#privacy">How your documents are handled ↗</a></footer>
-<dialog id="privacy-dialog" aria-labelledby="privacy-dialog-title"><div class="privacy-dialog-heading"><h2 id="privacy-dialog-title">Your documents, your choice.</h2><button type="button" id="close-privacy" aria-label="Close privacy information">Close</button></div><p>Local document reading stays in your browser. Comparing amounts sends only the facts you confirm.</p><p>Optional AI review sends your original, unredacted PDF to our server and <span class="ai-provider">the configured AI provider</span>, only after you give consent.</p><p id="dialog-ai-privacy" class="note"></p><p>Documents and results on this page are cleared on reload. Nothing is sent to your insurer automatically.</p></dialog>
+<dialog id="privacy-dialog" aria-labelledby="privacy-dialog-title"><div class="privacy-dialog-heading"><h2 id="privacy-dialog-title">Your documents, your choice.</h2><button type="button" id="close-privacy" aria-label="Close privacy information">Close</button></div><p>Local document reading stays in your browser. Comparing amounts sends only the facts you confirm.</p><p>Optional AI review sends your original, unredacted PDF to our server and <span class="ai-provider">the configured AI provider</span>, only after you give consent.</p><p id="dialog-ai-privacy" class="note">AI provider details are shown before upload on the review page. For this demo, use public samples or synthetic documents.</p><p>Documents and results on this page are cleared on reload. Nothing is sent to your insurer automatically.</p></dialog>
 </body>
 </html>

@@ -55,3 +55,7 @@ Cards now levitate with individual low-frequency phases. Pointer and scroll inpu
 The workspace starts hidden, including when opening a saved #workspace URL. Check your bill reveals it and moves keyboard focus to its heading. Privacy information opens in a separate native dialog without revealing the workspace. Reload starts again with the workspace hidden; no entered data is persisted.
 
 Browser checks passed: levitation, pause/resume, folder docking, reverse scroll, reduced motion, 390 px overflow check, CTA; initial hidden state, separate privacy dialog and Escape, click-to-open, synthetic comparison and hidden state after reload.
+
+## Separate landing and review pages
+
+Supersedes the single-page hidden workspace above: `/` now contains only the animated hero, product explanation, three capabilities, privacy explanation and review links. `/review.html` contains the actual upload, analysis and letters workflow. Check your bill navigates to this second page; it is directly addressable. The landing does not load app.js or call the AI health endpoint. Both pages retain independent privacy dialogs. Browser checks passed for navigation, direct review display, the $750 synthetic comparison, privacy dialog, return home and mobile overflow. No browser page errors.
