@@ -1,3 +1,4 @@
+import { beginProcessing, finishProcessing, failProcessing } from './processing.js';
 import { answer, draftLetter, draftInsuranceLetter } from './core.mjs';
 import { parseDocument } from './document-parser.mjs';
 import { readDocument } from './ingestion.mjs';
@@ -84,14 +85,17 @@ for (const kind of ['estimate', 'bill']) {
     ocrUsed[kind] = false;
     invalidate();
     notice('Reading the document in your browser…');
+    beginProcessing('Reading your document…', 'Local reading stays in your browser. No AI upload.');
     try {
       const result = await readDocument(file, message => notice(message));
       if (token !== generation) return;
       $(`${kind}-text`).value = result.text;
       ocrUsed[kind] = result.usedOCR;
       suggest(kind);
+      await finishProcessing('Your document has been read locally.');
       notice('Document read locally. Review the extracted fields and any warnings.');
     } catch (error) {
+      failProcessing();
       if (token === generation) notice(error.message.startsWith('Failed to fetch') ? 'PDF reader is unavailable. Install the npm dependencies or paste text instead.' : error.message, true);
     } finally {
       reading--;
@@ -343,6 +347,7 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
   const abort = new AbortController();
   const timeout = setTimeout(() => abort.abort(), 120000);
   notice(`Reading the original PDF with ${aiProviderLabel} and checking related payment totals…`);
+  beginProcessing('Reviewing your document…', `The PDF you approved is being reviewed with ${aiProviderLabel}.`);
   try {
     const response = await fetch('/api/extract', {method:'POST', headers:{'Content-Type':'application/pdf','X-AI-Consent':'send-original-pdf','X-AI-Provider':aiProvider}, body:file, signal:abort.signal});
     const data = await response.json();
@@ -368,8 +373,9 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
       if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`AI source excerpt (verify): ${field.evidence}`; extractionDetails.append(source); }
     }
     for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;extractionDetails.append(p); }
+    await finishProcessing('Your findings are ready to verify.');
     notice(`${data.consistency?.status === 'review_needed' ? 'Potential payment mismatch found. ' : ''}AI review complete. Review the source PDF. AI values have not changed the confirmed facts below.`);
-  } catch (error) { notice(error.name === 'AbortError' ? 'AI request timed out. Local rules still work.' : error.message, true); }
+  } catch (error) { failProcessing(); notice(error.name === 'AbortError' ? 'AI request timed out. Local rules still work.' : error.message, true); }
   finally { clearTimeout(timeout); reading--; $('notice').classList.remove('busy'); $('controls').disabled=false; $('demo').disabled=false; $('reset').disabled=false; }
 }));
 

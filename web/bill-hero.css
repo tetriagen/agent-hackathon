@@ -57,3 +57,6 @@
 .motion-toggle:hover{background:#272421;border-color:#8d7973}
 @media(max-width:600px){.bill-hero{height:160svh}.motion-toggle{left:16px;bottom:12px;padding:6px 10px;min-height:36px;font-size:10px}.bill-hero-action{bottom:48px}}
 @media(prefers-reduced-motion:reduce){.bill-hero{height:auto}.motion-toggle,.gather-folder,.folder-lens{display:none}.bill-float{will-change:auto}}
+/* The page scrolls freely while the documents gather; no pinned animation runway. */
+.bill-hero{height:auto}
+.bill-stage{position:relative;top:auto}

@@ -23,8 +23,8 @@ function measure(){
   if(!hero || !stage)return;
   const h=hero.getBoundingClientRect(),s=stage.getBoundingClientRect();
   const u=universe.getBoundingClientRect(),b=icon.getBoundingClientRect();
-  // Finish while the stage is still pinned, so the button receives the folder in view.
-  target=clamp(-h.top/Math.max(1,(h.height-s.height)*.88));
+  // Follow ordinary page scrolling; never hold the hero in place for the animation.
+  target=clamp(-h.top/Math.max(1,s.height*.64));
   geometry={mobile:innerWidth<600,spread:innerWidth<600?.58:Math.min(1,innerWidth/1440),
     startX:u.left+u.width/2-(s.left+s.width/2),startY:u.top+u.height/2-(s.top+s.height/2),
     endX:b.left+b.width/2-(s.left+s.width/2),endY:b.top+b.height/2-(s.top+s.height/2)};

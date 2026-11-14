@@ -59,3 +59,13 @@ Browser checks passed: levitation, pause/resume, folder docking, reverse scroll,
 ## Separate landing and review pages
 
 Supersedes the single-page hidden workspace above: `/` now contains only the animated hero, product explanation, three capabilities, privacy explanation and review links. `/review.html` contains the actual upload, analysis and letters workflow. Check your bill navigates to this second page; it is directly addressable. The landing does not load app.js or call the AI health endpoint. Both pages retain independent privacy dialogs. Browser checks passed for navigation, direct review display, the $750 synthetic comparison, privacy dialog, return home and mobile overflow. No browser page errors.
+
+## Document processing animation and free page scrolling
+
+The user's two Design Spells clips (Chengyu Calendar and adding a card in Apple Wallet) were opened in Chromium and inspected as video frames. The implementation uses original CSS 3D paper faces with rotations around all three axes and a perimeter magnifier; completion uses locally rendered rose particles gathering into a document silhouette and a checkmark. No reference media or code is bundled.
+
+Local file reading and optional consented AI extraction open a native modal with a translucent blurred backdrop. Successful operations finish the current 3.2-second animation cycle, followed by a 1.15-second completion phase. Fast operations therefore display for about 4.35 seconds. Once processing has returned, the status explicitly says the document is ready and the preview is finishing. Long operations cannot display success before the actual result. Errors close the animation immediately and show the existing error message. There is no invented percentage or claim that analysis is still running after completion. Hide animation and Escape dismiss the visual without cancelling the underlying operation. Pause motion and reduced motion are supported; reduced motion skips the artificial cycle delay.
+
+The review page now shares the landing's black / warm paper / rose palette and serif headings. The landing hero is no longer sticky and has no extra animation scroll runway: it moves with ordinary scrolling, while document gathering follows progress in parallel.
+
+Verified in Chromium: minimum successful presentation time, completion phase, malformed-PDF error recovery, reduced-motion fast completion, hide action, 390 px modal screenshot and ordinary hero movement of 250 px for 250 px scroll. Mocked AI extraction also retains the combined editable letter. Tests use synthetic documents and fixtures; no paid AI calls.
