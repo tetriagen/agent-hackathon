@@ -53,7 +53,7 @@ class MedicalOrbit extends HTMLElement {
     const scale = Math.min(w/720,h/440);
     c.translate(w/2,h/2+8*scale); c.scale(scale,scale);
     const glow = c.createRadialGradient(0,20,20,0,20,320);
-    glow.addColorStop(0,'#38506b'); glow.addColorStop(1,'#101e31');
+    glow.addColorStop(0,'#1d2839'); glow.addColorStop(1,'#0a0d14');
     c.fillStyle=glow;c.fillRect(-w/scale,-h/scale,w*2/scale,h*2/scale);
     const poly = (pts, color) => {c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=color;c.fill();};
     c.save();c.rotate(-.23);c.beginPath();c.ellipse(0,9,267,115,0,0,Math.PI*2);

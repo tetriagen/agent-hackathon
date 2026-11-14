@@ -13,3 +13,6 @@ artifacts/*
 !artifacts/.gitkeep
 playwright-report/
 test-results/
+
+# Local design validation
+.taste-skill/

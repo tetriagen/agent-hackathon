@@ -26,6 +26,7 @@ function facts() {
 function notice(message, error = false) {
   $('notice').textContent = message;
   $('notice').classList.toggle('error', error);
+  $('notice').classList.toggle('busy', reading > 0 || Boolean(controller));
 }
 
 function invalidate() {
@@ -94,6 +95,7 @@ for (const kind of ['estimate', 'bill']) {
       if (token === generation) notice(error.message.startsWith('Failed to fetch') ? 'PDF reader is unavailable. Install the npm dependencies or paste text instead.' : error.message, true);
     } finally {
       reading--;
+      $('notice').classList.remove('busy');
       if (!reading) { $('controls').disabled = false; $('demo').disabled = false; $('reset').disabled = false; }
     }
   });
@@ -120,6 +122,7 @@ $('demo').addEventListener('click', () => {
   $('payment-type').value = 'self_pay';
   for (const id of ['same-provider', 'estimate-received', 'within-window']) $(id).value = 'yes';
   invalidate();
+  document.querySelector('.comparison-panel').scrollIntoView({ block: 'start' });
   notice('Synthetic example loaded. The answers are sample assumptions; inspect and confirm them.');
 });
 
@@ -178,6 +181,7 @@ $('review-form').addEventListener('submit', async event => {
   } finally {
     clearTimeout(timeout);
     controller = null;
+    $('notice').classList.remove('busy');
     $('controls').disabled = reading > 0;
     $('demo').disabled = reading > 0;
   }
@@ -194,13 +198,13 @@ $('print').addEventListener('click', () => { if (draft) window.print(); });
 invalidate();
 
 
-function renderInsuranceLetter(box, result) {
-  const letter = draftInsuranceLetter(result);
+function renderInsuranceLetter(box, result, prepared) {
+  const letter = prepared === undefined ? draftInsuranceLetter(result) : prepared?.body;
   if (!letter) return;
   const section = document.createElement('section');
   section.className = 'insurance-letter';
   const title = document.createElement('h3');
-  title.textContent = 'Your letter to the insurance company';
+  title.textContent = prepared?.recipient === 'provider_billing' ? 'Your letter to the billing department' : 'Your letter to the insurance company';
   const note = document.createElement('p');
   note.className = 'note';
   note.textContent = 'Review the amounts and pages in the original PDF, then replace the bracketed details before sending. You can edit this draft below. Nothing is sent automatically.';
@@ -216,7 +220,7 @@ function renderInsuranceLetter(box, result) {
   const status = document.createElement('p');
   status.className = 'note';
   status.setAttribute('role', 'status');
-  status.textContent = 'Prepared from the payment comparison. No extra AI request. Edits stay in this page and are lost on reload.';
+  status.textContent = 'Prepared from the findings. No extra AI request. Edits stay in this page and are lost on reload.';
   const copy = document.createElement('button');
   copy.type = 'button';
   copy.textContent = 'Copy letter';
@@ -224,7 +228,7 @@ function renderInsuranceLetter(box, result) {
     if (!editor.value.trim()) { status.textContent = 'The letter is empty. Add text before copying.'; editor.focus(); return; }
     try {
       await navigator.clipboard.writeText(editor.value);
-      if (editor.isConnected) status.textContent = 'Letter copied. Paste it into your insurer’s message form or email.';
+      if (editor.isConnected) status.textContent = 'Letter copied. Paste it into the appropriate message form or email.';
     } catch {
       if (!editor.isConnected) return;
       editor.focus(); editor.select();
@@ -289,6 +293,39 @@ function renderConsistency(box, result) {
   box.append(section);
 }
 
+function renderDuplicates(box, result) {
+  if (!result) return;
+  const section = document.createElement('section');
+  section.className = 'duplicates';
+  const add = (tag, text, parent = section) => {
+    const node = document.createElement(tag);
+    node.textContent = text;
+    parent.append(node);
+    return node;
+  };
+  add('h3', 'Repeated service checks');
+  add('p', result.summary);
+  add('p', `Coverage: ${result.coverage}. Checked ${result.rows_checked} of ${result.rows_extracted} extracted rows.`).className = 'note';
+  for (const finding of result.findings || []) {
+    const item = add('div', '');
+    item.className = 'payment-check mismatch';
+    add('h4', 'Possible repeated service — verify in your PDF', item);
+    add('p', `Service date: ${finding.service_date}. Code: ${finding.code}. Charge per row: ${money.format(finding.charge_per_row)}.`, item);
+    add('p', finding.explanation, item);
+    const details = add('details', '', item);
+    add('summary', 'Read matching rows and PDF pages', details);
+    const list = add('ul', '', details);
+    for (const source of finding.sources || []) add('li', `PDF page ${source.page}, row ${source.row}: ${source.evidence}`, list);
+  }
+  if (result.skipped?.length) {
+    const details = add('details', '');
+    add('summary', `${result.skipped.length} rows excluded from matching`, details);
+    for (const row of result.skipped) add('p', `Page ${row.page}, row ${row.row}: ${row.reason}`, details);
+  }
+  add('p', result.limitation).className = 'note';
+  box.append(section);
+}
+
 // AI reads source sections; deterministic code checks the payment arithmetic.
 document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener('click', async () => {
   if (!aiProvider) { notice('AI is not configured. Local reading still works.', true); return; }
@@ -312,21 +349,28 @@ document.querySelectorAll('[data-ai]').forEach(button => button.addEventListener
     if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'AI extraction failed.');
     const result = data.extraction;
     renderConsistency(box, data.consistency);
-    renderInsuranceLetter(box, data.consistency);
-    const title = document.createElement('h3'); title.textContent = 'Local rules vs AI'; box.append(title);
+    renderDuplicates(box, data.duplicates);
+    renderInsuranceLetter(box, data.consistency, data.review_letter);
+    const extractionDetails = document.createElement('details');
+    extractionDetails.className = 'extraction-details';
+    const extractionSummary = document.createElement('summary');
+    extractionSummary.textContent = 'Compare local reading and AI extraction';
+    extractionDetails.append(extractionSummary);
+    box.append(extractionDetails);
+    const title = document.createElement('h3'); title.textContent = 'Local rules vs AI'; extractionDetails.append(title);
     const info = document.createElement('p');
-    info.textContent = `Local type: ${local.type}. AI type: ${result.type}. Model: ${data.model}. ${data.seconds}s. AI fields are suggestions: verify each one against the PDF. Local rules used the editable text above; AI read the original PDF.`; box.append(info);
+    info.textContent = `Local type: ${local.type}. AI type: ${result.type}. Model: ${data.model}. ${data.seconds}s. AI fields are suggestions: verify each one against the PDF. Local rules used the editable text above; AI read the original PDF.`; extractionDetails.append(info);
     for (const [name, field] of Object.entries(result.fields)) {
       const item = document.createElement('p');
       const localValue = local.fields[name]?.value;
       item.textContent = `${name.replaceAll('_', ' ')} — Local: ${localValue === null || localValue === undefined ? 'not found' : money.format(localValue)} · AI: ${field.value === null ? 'not found' : money.format(field.value)}${field.page ? ` · PDF page ${field.page}` : ''}`;
-      box.append(item);
-      if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`AI source excerpt (verify): ${field.evidence}`; box.append(source); }
+      extractionDetails.append(item);
+      if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`AI source excerpt (verify): ${field.evidence}`; extractionDetails.append(source); }
     }
-    for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;box.append(p); }
+    for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;extractionDetails.append(p); }
     notice(`${data.consistency?.status === 'review_needed' ? 'Potential payment mismatch found. ' : ''}AI review complete. Review the source PDF. AI values have not changed the confirmed facts below.`);
   } catch (error) { notice(error.name === 'AbortError' ? 'AI request timed out. Local rules still work.' : error.message, true); }
-  finally { clearTimeout(timeout); reading--; $('controls').disabled=false; $('demo').disabled=false; $('reset').disabled=false; }
+  finally { clearTimeout(timeout); reading--; $('notice').classList.remove('busy'); $('controls').disabled=false; $('demo').disabled=false; $('reset').disabled=false; }
 }));
 
 
