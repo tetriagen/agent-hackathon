@@ -37,3 +37,13 @@ Repository Playwright CLI with Chromium, synthetic local PDFs and mocked AI resp
 - Taste copy lint: 0 FAIL, 0 WARN.
 
 GATE: ERROR — Taste's browser checks could not find Chrome/Edge/Chromium. Its consistency/layout/performance checks are not claimed as passed. The repository's independent Playwright checks above did run. No gate waivers were added.
+
+## Reference-directed hero revision
+
+The user subsequently selected https://www.details.so/inspo/grail-app-a14d35 explicitly. Its embedded animation was opened in Chromium and visually inspected at 0, 3, 7 and 12 seconds. Observed: black background, oversized high-contrast serif headline, perspective card field and a scroll transition into a stack. This supersedes the earlier cross-and-coins hero.
+
+The new hero uses original HTML medical-document illustrations, clearly marked synthetic, with the existing demo amounts (900 / 1650 and 43.06 / 53.83). These are decorative facsimiles, not uploaded patient documents or embedded PDF files. Original ClearBill card backs replace Grail's branded artwork. No reference-site code, media or fonts were copied. Headline: “PAYING TOO MUCH?”; primary action: “Check your bill”.
+
+Pointer movement changes document perspective; native scrolling gathers the cards. There is no idle animation, scroll hijacking or network request for the decorative documents. Reduced-motion users see a static composition. The review workspace and API behavior are unchanged.
+
+Playwright verification passed at 1440, 1024, 768, 390 and 320 px: no horizontal overflow, CTA visible at the tested 900 px height, pointer and scroll reactions, static reduced-motion state, and the full synthetic self-pay comparison returning $750. Additional 390×844 screenshot inspected. No page errors. New hero screenshots are in the workspace work directory.

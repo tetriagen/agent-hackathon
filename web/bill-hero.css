@@ -1,0 +1,47 @@
+/* The reference's editorial scale and spatial card field, adapted to medical documents. */
+.site-header{background:#050505;border-color:#232323;height:76px}
+.site-header .wrap{width:calc(100% - 64px);max-width:none}
+.site-header .brand-period,.site-header .brand-mark{color:#f49b92}
+.site-header nav{gap:28px}
+.bill-hero{height:145svh;position:relative;background:#050505;color:#f7f4ee}
+.bill-stage{position:sticky;top:0;height:100svh;min-height:680px;overflow:hidden;isolation:isolate;perspective:1200px}
+.bill-title{position:absolute;top:2.5%;left:2%;width:96%;z-index:3;pointer-events:none}
+.bill-title h1{font-family:Didot,"Bodoni MT","Times New Roman",serif;font-weight:400;font-size:clamp(64px,10.25vw,180px);line-height:.95;letter-spacing:-.075em;text-align:center;white-space:nowrap;color:#f7f4ee}
+.bill-universe{position:absolute;inset:18% 0 20%;perspective:1100px;transform-style:preserve-3d}
+.bill-float{position:absolute;left:50%;top:50%;width:190px;height:260px;transform-style:preserve-3d;will-change:transform;transform:translate(-50%,-50%) translate3d(var(--x),var(--y),var(--z)) rotateY(var(--ry)) rotateZ(var(--rz));}
+.bill-float-0{--x:-470px;--y:-130px;--z:-210px;--ry:42deg;--rz:-9deg}
+.bill-float-1{--x:-260px;--y:50px;--z:20px;--ry:24deg;--rz:5deg}
+.bill-float-2{--x:0px;--y:-20px;--z:140px;--ry:-8deg;--rz:3deg}
+.bill-float-3{--x:300px;--y:-25px;--z:30px;--ry:-28deg;--rz:-4deg}
+.bill-float-4{--x:510px;--y:130px;--z:-160px;--ry:-155deg;--rz:8deg}
+.bill-float-5{--x:-90px;--y:-180px;--z:-260px;--ry:155deg;--rz:-8deg}
+.bill-float-6{--x:230px;--y:210px;--z:-230px;--ry:165deg;--rz:12deg}
+.bill-float-7{--x:-420px;--y:230px;--z:-290px;--ry:200deg;--rz:9deg}
+.bill-float-8{--x:500px;--y:-230px;--z:-300px;--ry:145deg;--rz:-8deg}
+.paper-front,.paper-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:7px;overflow:hidden;box-shadow:0 16px 45px #0008;border:1px solid #d5d1c8}
+.paper-front{padding:16px;background:#efede5;color:#1e2528;display:flex;flex-direction:column}
+.paper-top{display:flex;align-items:center;justify-content:space-between;gap:6px;font:7px/1.2 system-ui,sans-serif;color:#67665f}
+.pdf-stamp{padding:5px 4px;border:1px solid #ae665e;border-radius:3px;color:#a13f35;font-size:8px;font-weight:700}
+.paper-rule{border-top:1px solid #c7c4bb;margin:12px 0}
+.paper-kicker{font-size:7px;color:#6b6c64;margin:0 0 5px}
+.paper-front h3{font:500 21px/1.05 Georgia,serif;letter-spacing:-.8px;min-height:44px;text-wrap:initial}
+.paper-lines{margin:10px 0 14px;display:grid;gap:4px}.paper-lines i{height:3px;width:64%;background:#d2d0c7}.paper-lines i:last-child{width:44%}
+.paper-caption{font-size:7px;margin:0;color:#666b64}
+.paper-amount{font:400 26px/1.2 Georgia,serif;letter-spacing:-1px;margin:3px 0 13px}
+.paper-table{border-top:1px solid #cac8bf}.paper-row{display:flex;justify-content:space-between;gap:6px;border-bottom:1px solid #d6d3ca;padding:5px 0;font-size:6px}.paper-row b{font-weight:500}.paper-foot{display:flex;justify-content:space-between;margin-top:auto;padding-top:10px;font-size:6px;color:#666b64}
+.paper-back{transform:rotateY(180deg);background:#b95b4d;color:#f2c9b4;border-color:#b56858;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.paper-back>span{font:180px/.9 Georgia,serif}.paper-back p{font-size:22px;font-weight:500;letter-spacing:-1px;margin:0}.paper-back small{font-size:8px;margin-top:8px}.paper-back-eob{background:#9baa98;color:#233c34;border-color:#b0b9a6}.paper-back-estimate{background:#c5a563;color:#4d3825;border-color:#d5b97c}
+.stage-side{position:absolute;top:48%;font-size:11px;color:#a09d96;z-index:4}.stage-side-left{left:32px;writing-mode:vertical-rl;rotate:180deg}.stage-side-right{right:32px;writing-mode:vertical-rl}
+.bill-hero-action{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);width:min(420px,90%);text-align:center;z-index:5}
+.bill-hero-action>p{font-size:15px;line-height:1.5;color:#b9b6af;margin:0 0 16px}
+.bill-hero-action .btn{border-radius:50px;background:#f2b0a5;color:#201717;border:1px solid #f2b0a5;padding:8px 24px 8px 12px;gap:16px;min-height:52px}.bill-hero-action .btn:hover{background:#f9c5bc;border-color:#f9c5bc}
+.cta-cross{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#201717;color:#f2b0a5;font-size:26px;font-weight:400}
+.hero-small{display:block;font-size:11px;color:#9e9a93;margin-top:12px}
+.bill-stage:after{content:"";position:absolute;inset:auto 0 0;height:27%;background:linear-gradient(transparent,#050505 40%);pointer-events:none;z-index:2}
+@media(min-width:1600px){.bill-float{width:220px;height:300px}.paper-front{padding:20px}.paper-front h3{font-size:25px}.paper-amount{font-size:32px}.paper-row{font-size:8px}}
+@media(max-width:1024px){.bill-float{width:160px;height:230px}.paper-front{padding:12px}.paper-front h3{font-size:19px}.paper-amount{font-size:24px}.bill-title{top:6%}.bill-universe{inset:20% -16% 21%}.stage-side{display:none}}
+@media(max-width:600px){.site-header{height:64px}.site-header .wrap{width:calc(100% - 32px)}.site-header nav a{font-size:12px}.site-header nav{gap:16px}.bill-hero{height:125svh}.bill-stage{min-height:650px;height:calc(100svh - 20px)}.bill-title{top:5%;left:5%;width:90%}.bill-title h1{font-size:19vw;line-height:.89;white-space:normal;letter-spacing:-.065em;max-width:8ch;margin:auto}.bill-universe{inset:30% -60% 25%;perspective:900px}.bill-float{width:145px;height:210px}.paper-front{padding:11px}.paper-front h3{font-size:18px;min-height:38px}.paper-lines{margin:6px 0 10px}.paper-amount{font-size:23px;margin-bottom:9px}.paper-front .paper-rule{margin:9px 0}.bill-hero-action{bottom:28px}.bill-hero-action>p{font-size:13px}.bill-hero-action .btn{width:auto;min-width:220px}.hero-small{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.bill-hero{height:auto}.bill-stage{position:relative}.bill-float{will-change:auto}}
+/* Keep the first action inside the initial viewport, including the navigation. */
+.bill-stage{height:calc(100svh - 76px)}
+@media(max-width:600px){.bill-stage{height:calc(100svh - 64px);min-height:640px}}
