@@ -1,5 +1,7 @@
 # ClearBill — ANEsolves
 
+**Portfolio:** [all projects](projects/README.md) · [standalone ClearBill project](projects/clearbill/README.md). The existing root application remains the deployment source.
+
 **Understand your medical bill, verify questionable charges, and prepare a clarification letter.**
 
 [Open ClearBill](https://clearbill-5ay0.onrender.com) · [Review a document](https://clearbill-5ay0.onrender.com/review.html)

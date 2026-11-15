@@ -1,0 +1,21 @@
+{
+  "name": "agent-hackathon-design-tools",
+  "private": true,
+  "description": "ClearBill local PDF reader and browser verification tools",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "browser:help": "playwright-cli --help",
+    "browser:install": "playwright-cli install-browser",
+    "test:client": "node --test tests/billing-client.test.mjs"
+  },
+  "devDependencies": {
+    "@playwright/cli": "0.1.24"
+  },
+  "dependencies": {
+    "@tesseract.js-data/eng": "1.0.0",
+    "pdfjs-dist": "6.5.438",
+    "tesseract.js": "7.0.0"
+  }
+}

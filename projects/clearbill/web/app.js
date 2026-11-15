@@ -1,0 +1,455 @@
+import { setupReviewSteps, refreshSteps, showReviewStep, showReviewTab } from './review-steps.js';
+import { beginProcessing, finishProcessing, failProcessing } from './processing.js';
+import { answer, draftLetter, draftInsuranceLetter } from './core.mjs';
+import { parseDocument } from './document-parser.mjs';
+import { readDocument } from './ingestion.mjs';
+
+const $ = (id) => document.getElementById(id);
+let reading = 0;
+let generation = 0;
+let controller = null;
+let draft = '';
+const ocrUsed = { estimate: false, bill: false };
+let aiProvider = null;
+let aiProviderLabel = 'the configured AI provider';
+const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+function facts() {
+  return {
+    estimate_amount: $('estimate-amount').value.trim(),
+    billed_amount: $('bill-amount').value.trim(),
+    payment_type: $('payment-type').value,
+    same_provider: answer($('same-provider').value),
+    estimate_received: answer($('estimate-received').value),
+    within_120_days: answer($('within-window').value),
+  };
+}
+
+function notice(message, error = false) {
+  $('notice').textContent = message;
+  $('notice').classList.toggle('error', error);
+  $('notice').classList.toggle('busy', reading > 0 || Boolean(controller));
+}
+
+function invalidate() {
+  $('result').hidden = true;
+  $('confirmed').checked = false;
+  draft = '';
+  $('letter').textContent = '';
+  refreshSteps();
+  $('payload').textContent = JSON.stringify(facts(), null, 2);
+  updateAISelection();
+}
+
+function clearAI(kind) {
+  $(`${kind}-ai-result`).replaceChildren();
+  $(`${kind}-letter`).replaceChildren();
+  $('findings-confirmed').checked = false;
+}
+
+function suggest(kind) {
+  const parsed = parseDocument($(`${kind}-text`).value, { usedOCR: ocrUsed[kind] });
+  const box = $(`${kind}-parsed`);
+  box.replaceChildren();
+  const heading = document.createElement('p');
+  heading.textContent = `Document type: ${parsed.type.replaceAll('_', ' ')}. Read locally in your browser.`;
+  box.append(heading);
+  const fields = document.createElement('dl');
+  for (const [name, field] of Object.entries(parsed.fields)) {
+    if (field.value === null) continue;
+    const label = document.createElement('dt');
+    label.textContent = `${name.replaceAll('_', ' ')}: ${money.format(field.value)}`;
+    const quote = document.createElement('dd');
+    quote.textContent = `Source: ${field.evidence}`;
+    fields.append(label, quote);
+  }
+  box.append(fields);
+  for (const warning of parsed.warnings) {
+    const paragraph = document.createElement('p'); paragraph.className = 'note';
+    paragraph.textContent = warning; box.append(paragraph);
+  }
+  const correctType = kind === 'estimate' ? parsed.type === 'good_faith_estimate' : parsed.type === 'medical_bill';
+  const field = parsed.fields[kind === 'estimate' ? 'estimated_total' : 'billed_total'];
+  $(`${kind}-amount`).value = correctType ? (field.value ?? '') : '';
+  $(`${kind}-evidence`).textContent = correctType && field.value !== null
+    ? `Local match: “${field.evidence}”. Confirm this is the correct total.`
+    : 'No amount copied to the self-pay comparison. Check the document type and amounts.';
+  invalidate();
+}
+
+for (const kind of ['estimate', 'bill']) {
+  $(`${kind}-file`).addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const token = ++generation;
+    reading++;
+    $('controls').disabled = true;
+    $('demo').disabled = true;
+    $('reset').disabled = true;
+    $(`${kind}-text`).value = '';
+    $(`${kind}-amount`).value = '';
+    $(`${kind}-evidence`).textContent = '';
+    $(`${kind}-parsed`).replaceChildren();
+    clearAI(kind);
+    $('ai-consent').checked = false;
+    ocrUsed[kind] = false;
+    invalidate();
+    notice('Reading the document in your browser…');
+    beginProcessing('Reading your document…', 'Your document stays in your browser during local reading.');
+    try {
+      const result = await readDocument(file, message => notice(message));
+      if (token !== generation) return;
+      $(`${kind}-text`).value = result.text;
+      ocrUsed[kind] = result.usedOCR;
+      suggest(kind);
+      await finishProcessing('Your document has been read locally.');
+      notice('Document read locally. Review the extracted fields and any warnings.');
+    } catch (error) {
+      failProcessing();
+      if (token === generation) notice(error.message.startsWith('Failed to fetch') ? 'PDF reader is unavailable. Install the npm dependencies or paste text instead.' : error.message, true);
+    } finally {
+      reading--;
+      $('notice').classList.remove('busy');
+      if (!reading) { $('controls').disabled = false; $('demo').disabled = false; $('reset').disabled = false; }
+    }
+  });
+  $(`${kind}-text`).addEventListener('input', () => {
+    $(`${kind}-amount`).value = '';
+    $(`${kind}-evidence`).textContent = 'Text changed. Find the total again or enter it manually.';
+    $(`${kind}-parsed`).replaceChildren();
+    clearAI(kind);
+    $('ai-consent').checked = false;
+  });
+}
+
+document.querySelectorAll('[data-suggest]').forEach(button => button.addEventListener('click', () => suggest(button.dataset.suggest)));
+for (const type of ['input', 'change']) $('review-form').addEventListener(type, event => {
+  if (['estimate-text', 'bill-text', 'estimate-amount', 'bill-amount', 'payment-type', 'same-provider', 'estimate-received', 'within-window'].includes(event.target.id)) invalidate();
+});
+
+$('demo').addEventListener('click', () => {
+  $('review-form').reset();
+  updateAISelection();
+  for (const kind of ['estimate', 'bill']) clearAI(kind);
+  ocrUsed.estimate = false; ocrUsed.bill = false;
+  $('estimate-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nGood faith estimate\nOffice procedure: $900.00\nTotal estimated cost: $900.00';
+  $('bill-text').value = 'SYNTHETIC EXAMPLE — NOT A REAL PATIENT\nProvider: Example Clinic\nPatient: Demo Patient\nMedical bill\nOffice procedure: $1,650.00\nTotal charges: $1,650.00';
+  suggest('estimate'); suggest('bill');
+  $('payment-type').value = 'self_pay';
+  for (const id of ['same-provider', 'estimate-received', 'within-window']) $(id).value = 'yes';
+  invalidate();
+  $('optional-estimate').open = true;
+  showReviewTab('selfpay');
+  showReviewStep('verify');
+  notice('Synthetic example loaded. The answers are sample assumptions; inspect and confirm them.');
+});
+
+$('reset').addEventListener('click', () => {
+  if (!window.confirm('Clear this case from the page? Unsaved text and results will be lost.')) return;
+  generation++;
+  controller?.abort();
+  $('review-form').reset();
+  updateAISelection();
+  for (const kind of ['estimate', 'bill']) {
+    $(`${kind}-evidence`).textContent = '';
+    $(`${kind}-parsed`).replaceChildren();
+    clearAI(kind);
+    $('ai-consent').checked = false;
+    ocrUsed[kind] = false;
+  }
+  invalidate();
+  showReviewTab('findings');
+  showReviewStep('read');
+  $('optional-estimate').open = false;
+  notice('Case cleared.');
+});
+
+$('review-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (reading || controller || $('step-verify').hidden || $('panel-selfpay').hidden) return;
+  for (const kind of ['estimate', 'bill']) {
+    const type = parseDocument($(`${kind}-text`).value).type;
+    if (['eob', 'educational_example'].includes(type) || (kind === 'bill' && type === 'good_faith_estimate') || (kind === 'estimate' && type === 'medical_bill')) {
+      notice('These document types do not form a self-pay estimate and bill. Read the extracted fields above or clear the documents to enter a supported case.', true);
+      return;
+    }
+  }
+  const payload = facts();
+  const token = generation;
+  controller = new AbortController();
+  const timeout = setTimeout(() => controller?.abort(), 15000);
+  $('controls').disabled = true;
+  $('demo').disabled = true;
+  $('result').hidden = true;
+  notice('Comparing the confirmed facts…');
+  try {
+    const response = await fetch('/api/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal });
+    if (!response.ok) throw new Error('Comparison failed. Check the amounts and retry.');
+    const result = await response.json();
+    if (token !== generation) return;
+    $('result-title').textContent = result.title;
+    $('difference').textContent = `Estimate: ${money.format(result.estimate_amount)} · Bill: ${money.format(result.billed_amount)} · Difference: ${money.format(result.difference)}`;
+    $('explanation').textContent = result.explanation;
+    $('limitation').textContent = result.limitation;
+    $('next-steps').replaceChildren(...result.next_steps.map(step => { const li = document.createElement('li'); li.textContent = step; return li; }));
+    $('source').href = result.source_url;
+    draft = draftLetter(result);
+    $('letter').textContent = draft;
+    $('result').hidden = false;
+    refreshSteps();
+    $('result-title').focus();
+    notice('Comparison complete. No complaint has been sent.');
+  } catch (error) {
+    if (token === generation) notice(error.name === 'AbortError' ? 'Request timed out. Check the server and retry.' : 'Could not complete the comparison. Check the server and amounts, then retry.', true);
+  } finally {
+    clearTimeout(timeout);
+    controller = null;
+    $('notice').classList.remove('busy');
+    $('controls').disabled = reading > 0;
+    $('demo').disabled = reading > 0;
+    refreshSteps();
+  }
+});
+
+$('download').addEventListener('click', () => {
+  if (!draft) return;
+  const url = URL.createObjectURL(new Blob([draft], { type: 'text/plain;charset=utf-8' }));
+  const anchor = document.createElement('a');
+  anchor.href = url; anchor.download = 'billing-review-request.txt'; anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+$('print').addEventListener('click', () => { if (draft) window.print(); });
+invalidate();
+
+
+function renderInsuranceLetter(box, result, prepared) {
+  const letter = prepared === undefined ? draftInsuranceLetter(result) : prepared?.body;
+  if (!letter) return;
+  const section = document.createElement('section');
+  section.className = 'insurance-letter';
+  const title = document.createElement('h3');
+  title.textContent = prepared?.recipient === 'provider_billing' ? 'Your letter to the billing department' : 'Your letter to the insurance company';
+  const note = document.createElement('p');
+  note.className = 'note';
+  note.textContent = 'Review the amounts and pages in the original PDF, then replace the bracketed details before sending. You can edit this draft below. Nothing is sent automatically.';
+  const label = document.createElement('label');
+  const editor = document.createElement('textarea');
+  editor.id = `${box.id}-insurance-letter`;
+  editor.name = editor.id;
+  editor.rows = 18;
+  editor.autocomplete = 'off';
+  editor.value = letter;
+  label.htmlFor = editor.id;
+  label.textContent = 'Editable letter';
+  const status = document.createElement('p');
+  status.className = 'note';
+  status.setAttribute('role', 'status');
+  status.textContent = 'Prepared from the findings. Edits stay in this page and are lost on reload.';
+  const copy = document.createElement('button');
+  copy.type = 'button';
+  copy.textContent = 'Copy letter';
+  copy.addEventListener('click', async () => {
+    if (!editor.value.trim()) { status.textContent = 'The letter is empty. Add text before copying.'; editor.focus(); return; }
+    try {
+      await navigator.clipboard.writeText(editor.value);
+      if (editor.isConnected) status.textContent = 'Letter copied. Paste it into the appropriate message form or email.';
+    } catch {
+      if (!editor.isConnected) return;
+      editor.focus(); editor.select();
+      status.textContent = 'Automatic copying is unavailable. The letter is selected; use your device’s Copy command or download it.';
+    }
+  });
+  const download = document.createElement('button');
+  download.type = 'button';
+  download.textContent = 'Download letter (.txt)';
+  download.addEventListener('click', () => {
+    if (!editor.value.trim()) { status.textContent = 'The letter is empty. Add text before downloading.'; editor.focus(); return; }
+    const url = URL.createObjectURL(new Blob([editor.value], {type:'text/plain;charset=utf-8'}));
+    const link = document.createElement('a');
+    link.href = url; link.download = 'insurance-payment-clarification.txt'; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    status.textContent = 'Download requested. Review your details before sending the letter.';
+  });
+  section.append(title, note, label, editor, copy, download, status);
+  $(`${box.id.split('-')[0]}-letter`).append(section);
+}
+
+function renderConsistency(box, result) {
+  const section = document.createElement('section');
+  section.className = 'consistency';
+  const add = (tag, text, parent = section) => {
+    const node = document.createElement(tag);
+    node.textContent = text;
+    parent.append(node);
+    return node;
+  };
+  add('h3', 'Payment consistency checks');
+  if (!result) {
+    add('p', 'Payment consistency was not checked. Extracted amounts alone do not verify the document.');
+    box.append(section);
+    return;
+  }
+  add('strong', result.status === 'review_needed' ? 'Potential payment mismatch found'
+    : result.status === 'checked' ? 'Payment totals compared' : 'Not enough comparable payment data');
+  add('p', result.summary);
+  for (const check of result.checks) {
+    const item = document.createElement('div');
+    item.className = `payment-check ${check.status === 'mismatch' ? 'mismatch' : ''}`;
+    section.append(item);
+    const status = check.status === 'mismatch' ? 'Mismatch to verify' : check.status === 'match' ? 'These totals match' : 'Comparison skipped';
+    add('h4', `${status} — ${check.scope}`, item);
+    if (check.difference !== null) {
+      add('p', `Reported total payment: ${money.format(check.reported_total)}. Sum of payment distribution: ${money.format(check.distribution_total)}.`, item);
+      const difference = Number(check.difference);
+      add('p', difference ? `Difference: ${money.format(Math.abs(difference))} — distribution is ${difference > 0 ? 'higher' : 'lower'} than the reported total.` : 'Difference: $0.00.', item);
+    }
+    add('p', check.explanation, item);
+    const details = add('details', '', item);
+    add('summary', 'Source amounts and PDF pages — verify in the original', details);
+    const scopeReason = {same_claim_block:'Both sections appear in the same claim block.', matching_claim_reference:'The sections have matching claim references.', matching_payment_reference:'The sections have matching payment references.', unclear:'The relationship between these sections is unclear.'};
+    add('p', `Document relationship: ${scopeReason[check.scope_evidence] || 'Not established.'}`, details);
+    const sources = add('ul', '', details);
+    for (const source of check.sources) {
+      add('li', `${source.label}: ${source.value === null ? 'not readable' : money.format(source.value)}${source.page ? ` · PDF page ${source.page}` : ''}. Excerpt: ${source.evidence || 'not available'}`, sources);
+    }
+  }
+  add('p', result.limitation).className = 'note';
+  box.append(section);
+}
+
+function renderDuplicates(box, result) {
+  if (!result) return;
+  const section = document.createElement('section');
+  section.className = 'duplicates';
+  const add = (tag, text, parent = section) => {
+    const node = document.createElement(tag);
+    node.textContent = text;
+    parent.append(node);
+    return node;
+  };
+  add('h3', 'Repeated service checks');
+  add('p', result.summary);
+  add('p', `Coverage: ${result.coverage}. Checked ${result.rows_checked} of ${result.rows_extracted} extracted rows.`).className = 'note';
+  for (const finding of result.findings || []) {
+    const item = add('div', '');
+    item.className = 'payment-check mismatch';
+    add('h4', 'Possible repeated service — verify in your PDF', item);
+    add('p', `Service date: ${finding.service_date}. Code: ${finding.code}. Charge per row: ${money.format(finding.charge_per_row)}.`, item);
+    add('p', finding.explanation, item);
+    const details = add('details', '', item);
+    add('summary', 'Read matching rows and PDF pages', details);
+    const list = add('ul', '', details);
+    for (const source of finding.sources || []) add('li', `PDF page ${source.page}, row ${source.row}: ${source.evidence}`, list);
+  }
+  if (result.skipped?.length) {
+    const details = add('details', '');
+    add('summary', `${result.skipped.length} rows excluded from matching`, details);
+    for (const row of result.skipped) add('p', `Page ${row.page}, row ${row.row}: ${row.reason}`, details);
+  }
+  add('p', result.limitation).className = 'note';
+  box.append(section);
+}
+
+// One explicit consent covers the selected original PDFs. Each keeps its own findings.
+function selectedPDFs() {
+  return ['estimate', 'bill'].map(kind => ({kind, file: $(`${kind}-file`).files[0]}))
+    .filter(({file}) => file && /\.pdf$/i.test(file.name));
+}
+function updateAISelection() {
+  const estimateFile = $('estimate-file').files[0];
+  $('estimate-added').textContent = estimateFile ? `Added: ${estimateFile.name}` : $('estimate-text').value.trim() ? 'Estimate text added' : '';
+  const selected = selectedPDFs();
+  $('ai-selection').textContent = selected.length
+    ? `PDFs for review: ${selected.map(({file}) => file.name).join(' · ')}. Text files and pasted text are not sent.`
+    : 'Choose a PDF to check your bill. Text files and pasted text stay local.';
+}
+async function reviewPDF(kind, file) {
+  const box = $(`${kind}-ai-result`);
+  const local = parseDocument($(`${kind}-text`).value, {usedOCR:ocrUsed[kind]});
+  const abort = new AbortController();
+  const timeout = setTimeout(() => abort.abort(), 120000);
+  try {
+    const response = await fetch('/api/extract', {method:'POST', headers:{'Content-Type':'application/pdf','X-AI-Consent':'send-original-pdf','X-AI-Provider':aiProvider}, body:file, signal:abort.signal});
+    const data = await response.json();
+    if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Document review failed.');
+    const result = data.extraction;
+    renderConsistency(box, data.consistency);
+    renderDuplicates(box, data.duplicates);
+    renderInsuranceLetter(box, data.consistency, data.review_letter);
+    const extractionDetails = document.createElement('details');
+    extractionDetails.className = 'extraction-details';
+    const extractionSummary = document.createElement('summary');
+    extractionSummary.textContent = 'Review extracted details';
+    extractionDetails.append(extractionSummary);
+    box.append(extractionDetails);
+    const title = document.createElement('h3'); title.textContent = 'Document details'; extractionDetails.append(title);
+    const info = document.createElement('p');
+    info.textContent = `Local reading: ${local.type}. PDF review: ${result.type}. Extracted fields are suggestions: verify each one against your PDF. Local reading uses the editable text; PDF review uses the original file.`; extractionDetails.append(info);
+    for (const [name, field] of Object.entries(result.fields)) {
+      const item = document.createElement('p');
+      const localValue = local.fields[name]?.value;
+      item.textContent = `${name.replaceAll('_', ' ')} — Local: ${localValue === null || localValue === undefined ? 'not found' : money.format(localValue)} · PDF review: ${field.value === null ? 'not found' : money.format(field.value)}${field.page ? ` · PDF page ${field.page}` : ''}`;
+      extractionDetails.append(item);
+      if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`Source excerpt (verify): ${field.evidence}`; extractionDetails.append(source); }
+    }
+    for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;extractionDetails.append(p); }
+  } finally { clearTimeout(timeout); }
+}
+$('review-ai').addEventListener('click', async () => {
+  if (reading || controller) return;
+  if (!aiProvider) { notice('Document review is unavailable. Local reading still works.', true); return; }
+  const selected = selectedPDFs();
+  if (!selected.length) { notice('Select an original PDF to check your bill. Pasted text is not sent.', true); return; }
+  if (!$('ai-consent').checked) { notice(`Confirm the document-sharing consent below first.`, true); $('ai-consent').focus(); return; }
+  if (selected.some(({file}) => file.size > 10 * 1024 * 1024)) { notice('Each PDF must be no larger than 10 MB.', true); return; }
+  for (const {kind} of selected) clearAI(kind);
+  refreshSteps();
+  reading++;
+  $('controls').disabled = true; $('demo').disabled = true; $('reset').disabled = true;
+  beginProcessing('Reviewing your document…', 'Checking payment totals and repeated services in your selected PDFs.');
+  let completed = 0;
+  try {
+    for (const {kind, file} of selected) {
+      notice(`Reviewing document ${completed + 1} of ${selected.length}: ${file.name}…`);
+      await reviewPDF(kind, file);
+      completed++;
+    }
+    refreshSteps();
+    await finishProcessing('Your findings are ready to verify.');
+    showReviewTab('findings');
+    showReviewStep('verify');
+    notice(`Review complete for ${completed} PDF${completed === 1 ? '' : 's'}. Verify the findings against your originals. Nothing has been sent to your insurer.`);
+  } catch (error) {
+    failProcessing();
+    refreshSteps();
+    const reason = error.name === 'AbortError' ? 'Document review timed out.' : error.message;
+    notice(`${reason} ${completed} of ${selected.length} PDFs reviewed. Completed findings remain available through Next; local reading still works.`, true);
+  } finally {
+    reading--; $('notice').classList.remove('busy');
+    $('controls').disabled = false; $('demo').disabled = false; $('reset').disabled = false;
+  }
+});
+for (const kind of ['estimate', 'bill']) $(`${kind}-file`).addEventListener('change', updateAISelection);
+updateAISelection();
+
+
+async function configureAI() {
+  try {
+    const response = await fetch('/api/health');
+    if (!response.ok) return;
+    const health = await response.json();
+    if (!health.ai_enabled || !['openai', 'gemini'].includes(health.ai_provider)) {
+      $('ai-privacy').textContent = 'Document review is unavailable. Local reading still works.';
+      return;
+    }
+    aiProvider = health.ai_provider;
+    aiProviderLabel = aiProvider === 'gemini' ? 'Gemini (Google)' : 'OpenAI';
+    document.querySelectorAll('.ai-provider').forEach(el => {el.textContent = aiProviderLabel;});
+    $('ai-privacy').textContent = aiProvider === 'gemini'
+      ? 'Gemini Free Tier may use submitted data to improve Google products. Use public samples or synthetic documents for this demo.'
+      : 'AI sends the original unredacted PDF to OpenAI. Verify the extracted values before using them.';
+    $('review-ai').disabled = false;
+  } catch { $('ai-privacy').textContent = 'Could not check service availability. Local reading still works.'; }
+}
+setupReviewSteps(() => reading > 0 || Boolean(controller));
+configureAI();

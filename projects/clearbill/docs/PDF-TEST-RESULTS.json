@@ -1,0 +1,172 @@
+{
+  "method": "Actual Chromium uploads; PDF.js text extraction and local Tesseract OCR; deterministic label matching. No OpenAI calls. This is a sample compatibility check, not an accuracy benchmark.",
+  "results": [
+    {
+      "file": "blue-cross-nc-eob.pdf",
+      "type": "eob",
+      "fields": {
+        "billed_total": {
+          "value": "989.00",
+          "evidence": "Total Amount Provider(s) Charged: $989.00",
+          "ambiguous": false
+        },
+        "estimated_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "patient_responsibility": {
+          "value": "159.00",
+          "evidence": "What Provider(s) May Bill You: $159.00",
+          "ambiguous": false
+        },
+        "plan_paid": {
+          "value": "561.00",
+          "evidence": "Plan paid $561.00",
+          "ambiguous": false
+        }
+      },
+      "warnings": [
+        "EOB explains an insurance claim. It is not a provider bill or a good faith estimate. Do not use it in the self-pay comparison below.",
+        "This EOB combines several claims. Summary amounts do not belong to a single visit automatically."
+      ],
+      "usedOCR": false,
+      "status": "partial_extraction"
+    },
+    {
+      "file": "healthcomp-eob.pdf",
+      "type": "eob",
+      "fields": {
+        "billed_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "estimated_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "patient_responsibility": {
+          "value": "20.00",
+          "evidence": "PATIENT RESPONSIBILITY 20.00",
+          "ambiguous": false
+        },
+        "plan_paid": {
+          "value": "21.77",
+          "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+          "ambiguous": false
+        }
+      },
+      "warnings": [
+        "EOB explains an insurance claim. It is not a provider bill or a good faith estimate. Do not use it in the self-pay comparison below."
+      ],
+      "usedOCR": false,
+      "status": "partial_extraction"
+    },
+    {
+      "file": "cms-good-faith-estimate-blank.pdf",
+      "type": "good_faith_estimate",
+      "fields": {
+        "billed_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "estimated_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "patient_responsibility": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "plan_paid": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        }
+      },
+      "warnings": [
+        "No unambiguous labeled totals found. This may be a blank form or an unsupported layout."
+      ],
+      "usedOCR": false,
+      "status": "manual_review"
+    },
+    {
+      "file": "cms-estimate-vs-bill-examples.pdf",
+      "type": "educational_example",
+      "fields": {
+        "billed_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "estimated_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "patient_responsibility": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "plan_paid": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        }
+      },
+      "warnings": [
+        "This document contains several teaching scenarios, not one patient case. Select a scenario and enter its amounts manually."
+      ],
+      "usedOCR": false,
+      "status": "manual_review"
+    },
+    {
+      "file": "jane-jones-eob.pdf",
+      "type": "eob",
+      "fields": {
+        "billed_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "estimated_total": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "patient_responsibility": {
+          "value": null,
+          "evidence": "",
+          "ambiguous": false
+        },
+        "plan_paid": {
+          "value": "43.06",
+          "evidence": "TOTAL PAYMENT AMOUNT | 43.06",
+          "ambiguous": false
+        }
+      },
+      "warnings": [
+        "OCR was used. Check every amount against the original PDF; OCR can misread digits.",
+        "EOB explains an insurance claim. It is not a provider bill or a good faith estimate. Do not use it in the self-pay comparison below."
+      ],
+      "usedOCR": true,
+      "status": "partial_extraction"
+    }
+  ],
+  "page_errors": [],
+  "external_requests": [],
+  "upload_posts": [],
+  "limitations": [
+    "HealthComp billed total was not extracted.",
+    "Jane Jones: only total payment 43.06 was reliably labeled; patient responsibility and billed total need manual reading.",
+    "CMS blank template contains no amounts; CMS multi-scenario PDF is not treated as one patient case.",
+    "No insurance coverage decisions or billing violations inferred.",
+    "Luminare was not downloaded and was not tested."
+  ]
+}

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="soft" data-buttons="solid" data-motion>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Review medical bills and EOBs, check payment mismatches and repeated services, and prepare a letter asking for clarification.">
+  <meta name="page-type" content="software">
+  <meta name="site-kind" content="software">
+  <meta name="theme-color" content="#050505">
+  <meta property="og:title" content="ClearBill — medical bill review">
+  <meta property="og:description" content="Read your documents. Check the details. Prepare your next step.">
+  <title>Check your bill — ClearBill</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/processing.css">
+  <link rel="stylesheet" href="/assets/motion/motion.css">
+  <script type="module" src="/app.js"></script>
+  <script type="module" src="/review-navigation.js"></script>
+</head>
+<body class="review-page">
+<a class="skip-link" href="#main">Skip to review</a>
+<header class="site-header"><div class="wrap nav-inner">
+  <a class="brand" href="/" aria-label="ClearBill home"><span class="brand-mark" aria-hidden="true">+</span>ClearBill<span class="brand-period">.</span></a>
+  <nav aria-label="Main navigation"><a href="/">← Overview</a><a href="#privacy">Your privacy</a></nav>
+  <span class="header-note"><span class="status-dot" aria-hidden="true"></span>Medical bill review</span>
+</div></header>
+<main id="main">
+  <section id="workspace" class="workspace wrap" aria-labelledby="workspace-title">
+    <div class="section-heading"><div><h1 id="workspace-title">Check your medical bill.</h1><p class="section-lead">Start with your bill or EOB. Add an estimate only if you want to compare.</p></div>
+      <div class="workspace-actions"><button class="btn btn--secondary" type="button" id="demo">Try a synthetic example</button><button class="btn btn--secondary" type="button" id="reset">Clear this case</button></div>
+    </div>
+    <ol class="workflow" aria-label="Review process"><li aria-current="step"><span>01</span> Read documents</li><li><span>02</span> Verify findings</li><li><span>03</span> Prepare a letter</li></ol>
+    <div id="privacy" class="privacy-panel"><div class="privacy-heading"><span aria-hidden="true">↗</span><strong>Your privacy comes first.</strong></div><p>Your documents are sent for review only with your consent. <a href="#privacy">How we handle your documents ↗</a></p></div>
+    <p id="notice" role="status" aria-live="polite"></p>
+  <form id="review-form">
+    <fieldset id="controls">
+      <legend class="sr-only">Read documents and confirm your facts</legend>
+      <section id="step-read" class="review-step" aria-label="Read documents">
+      <p class="file-guidance">PDF or .txt · 30 pages maximum · English OCR for up to 5 scanned pages. Verify recognized amounts.</p>
+      <div class="document-upload-flow">
+        <section class="document-card" aria-labelledby="bill-title">
+          <div class="document-heading"><span class="document-number" aria-hidden="true">↑</span><div><h2 id="bill-title">Your bill or EOB</h2><p>The charges or insurance explanation you received.</p></div></div>
+          <div class="upload-area"><label for="bill-file"><span class="upload-symbol" aria-hidden="true">↑</span>Choose bill<span class="upload-hint">PDF or text, up to 10 MB</span></label><input id="bill-file" name="bill-file" type="file" accept=".pdf,.txt"></div>
+          <details class="text-details"><summary>Paste or inspect document text</summary><label for="bill-text">Bill text — stays in your browser</label>
+          <textarea id="bill-text" rows="8" maxlength="100000" spellcheck="false" name="bill-text"></textarea>
+          <button class="btn btn--secondary" type="button" data-suggest="bill">Read document fields</button></details>
+        </section>
+        <details id="optional-estimate" class="optional-estimate"><summary><span>Add an estimate — optional</span><span id="estimate-added" class="note"></span></summary><p class="note">Have a written estimate from before your care? Add it to compare with your final bill. You can review a bill or EOB on its own.</p>
+        <section class="document-card" aria-labelledby="estimate-title">
+          <div class="document-heading"><span class="document-number" aria-hidden="true">+</span><div><h2 id="estimate-title">Your estimate</h2><p>The amount you expected to pay.</p></div></div>
+          <div class="upload-area"><label for="estimate-file"><span class="upload-symbol" aria-hidden="true">↑</span>Choose estimate<span class="upload-hint">PDF or text, up to 10 MB</span></label><input id="estimate-file" name="estimate-file" type="file" accept=".pdf,.txt"></div>
+          <details class="text-details"><summary>Paste or inspect document text</summary><label for="estimate-text">Estimate text — stays in your browser</label>
+          <textarea id="estimate-text" rows="8" maxlength="100000" spellcheck="false" name="estimate-text"></textarea>
+          <button class="btn btn--secondary" type="button" data-suggest="estimate">Read document fields</button></details>
+        </section>
+        </details>
+      </div>
+
+      <div class="ai-controls shared-ai"><p class="ai-heading">Review your documents <span>Find inconsistencies</span></p>
+      <p id="ai-selection" class="note">Choose a PDF to check your bill. Text files and pasted text stay local.</p>
+      <p id="ai-privacy" class="note" aria-live="polite"></p>
+      <label class="check"><input id="ai-consent" type="checkbox" name="ai-consent"><span>I agree to send the selected original PDFs to <span class="ai-provider">the configured AI provider</span>. They may contain personal information and are not redacted. Editing the text above does not change the PDFs sent.</span></label>
+      <button class="btn btn--primary" type="button" id="review-ai" disabled>Check your bill <span aria-hidden="true">↗</span></button></div>
+      <div class="step-actions"><span>Next, check what your documents say.</span><button type="button" id="to-verify" class="btn btn--secondary">Next: verify findings →</button></div>
+      </section>
+      <section id="step-verify" class="review-step" hidden aria-labelledby="verify-title">
+      <h2 id="verify-title" tabindex="-1">Verify findings.</h2>
+      <div class="review-tabs" role="tablist" aria-label="Review type"><button type="button" role="tab" id="tab-findings" aria-controls="panel-findings" aria-selected="true">Document findings</button><button type="button" role="tab" id="tab-selfpay" aria-controls="panel-selfpay" aria-selected="false" tabindex="-1">Self-pay comparison</button></div>
+      <div id="panel-findings" role="tabpanel" aria-labelledby="tab-findings">
+      <p id="findings-empty">No document findings yet. Go back to upload a document, or use Self-pay comparison to enter amounts manually.</p>
+<section id="estimate-findings" class="finding-document" hidden><h3>Your estimate</h3><p id="estimate-evidence" class="note"></p><div id="estimate-parsed"></div><div id="estimate-ai-result"></div></section>
+<section id="bill-findings" class="finding-document" hidden><h3>Your bill or EOB</h3><p id="bill-evidence" class="note"></p><div id="bill-parsed"></div><div id="bill-ai-result"></div></section>
+<p class="note">Local reading extracts amounts only. Payment inconsistencies and repeated services require the document review on the previous step.</p>
+      </div>
+      <div id="panel-selfpay" role="tabpanel" aria-labelledby="tab-selfpay" hidden>
+      <div class="comparison-panel"><div class="comparison-intro"><h2>Check the difference.</h2><p>For care paid without insurance, confirm your estimate and final bill below.</p></div><div class="comparison-fields">
+      <p>Rules recognize a limited set of labels. EOBs and teaching examples are shown separately and cannot be used as self-pay bills here. Unknown formats require manual entry.</p>
+      <div class="columns">
+        <div><label for="estimate-amount">Estimated amount (USD)</label><input id="estimate-amount" required inputmode="decimal" pattern="[0-9]{1,8}(\.[0-9]{1,2})?" placeholder="900.00" autocomplete="off" name="estimate-amount"></div>
+        <div><label for="bill-amount">Billed amount (USD)</label><input id="bill-amount" required inputmode="decimal" pattern="[0-9]{1,8}(\.[0-9]{1,2})?" placeholder="1650.00" autocomplete="off" name="bill-amount"></div>
+      </div>
+      <div class="comparison-questions">
+      <div><label for="payment-type">Did you use insurance for this care?</label>
+      <select id="payment-type" name="payment-type"><option value="unknown">Not sure</option><option value="self_pay">No — self-pay / uninsured</option><option value="insurance">Yes — insurance</option></select></div>
+      <div><label for="same-provider">Do both amounts belong to the same provider or facility?</label>
+      <select id="same-provider" name="same-provider"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div><label for="estimate-received">Did you receive a written good faith estimate before care?</label>
+      <select id="estimate-received" name="estimate-received"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div><label for="within-window">Is the date on your initial bill within the last 120 days?</label>
+      <select id="within-window" name="within-window"><option value="unknown">Not sure</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+      </div>
+
+      <details class="facts-details"><summary>Review the facts sent for comparison</summary><pre id="payload"></pre></details>
+      <label class="check"><input type="checkbox" id="confirmed" required name="confirmed"> I checked the amounts and the data above.</label>
+      <button class="btn btn--primary" id="analyze" type="submit">Compare amounts <span aria-hidden="true">↗</span></button></div></div>
+
+  <section class="result-panel" id="result" hidden aria-labelledby="result-title">
+    <h2 id="result-title" tabindex="-1"></h2>
+    <p id="difference"></p>
+    <p id="explanation"></p>
+    <ol id="next-steps"></ol>
+    <p id="limitation" class="note"></p>
+    <a id="source" target="_blank" rel="noopener noreferrer">Check the CMS requirements</a>
+  </section>
+      </div>
+      <label id="verify-confirmation" class="check" hidden><input type="checkbox" id="findings-confirmed">I checked the findings and source pages against my PDF.</label><p id="letter-hint" class="note"></p>
+      <div class="step-actions"><button type="button" data-step="read" class="btn btn--secondary">← Back to documents</button><button type="button" id="to-letter" class="btn btn--primary">Next: prepare a letter →</button></div>
+      </section>
+      <section id="step-letter" class="review-step" hidden aria-labelledby="letter-title">
+      <h2 id="letter-title" tabindex="-1">Prepare a letter.</h2>
+      <p id="letter-empty">No letter is available yet. Compare your self-pay amounts or run a document review to check for findings that support a clarification request.</p>
+      <div id="selfpay-letter" hidden>    <h3>Draft request</h3>
+    <p>This is a request for an explanation, not a submitted complaint. Add your details after downloading.</p>
+    <pre id="letter"></pre>
+    <button type="button" id="download">Download draft (.txt)</button>
+    <button type="button" id="print">Print / save as PDF</button>
+</div>
+      <div id="estimate-letter"></div><div id="bill-letter"></div>
+      <div class="step-actions"><button type="button" data-step="verify" class="btn btn--secondary">← Back to findings</button></div>
+      </section>
+    </fieldset>
+  </form>
+
+  </section>
+
+</main>
+<footer class="wrap site-footer"><a class="brand" href="/">ClearBill<span class="brand-period">.</span></a><p>Questions about a bill deserve an explanation.</p><a href="#privacy">How your documents are handled ↗</a></footer>
+<dialog id="privacy-dialog" aria-labelledby="privacy-dialog-title"><div class="privacy-dialog-heading"><h2 id="privacy-dialog-title">Your documents, your choice.</h2><button type="button" id="close-privacy" aria-label="Close privacy information">Close</button></div><p>Local document reading stays in your browser. Comparing amounts sends only the facts you confirm.</p><p>Optional AI review sends your original, unredacted PDF to our server and <span class="ai-provider">the configured AI provider</span>, only after you give consent.</p><p id="dialog-ai-privacy" class="note"></p><p>Documents and results on this page are cleared on reload. Nothing is sent to your insurer automatically.</p></dialog>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{
+  "method": "Manually checked against rendered public PDFs before obtaining AI results. Match document-level printed summary values only. Blank GFE and multiple worked scenarios have no single patient total.",
+  "special_checks": [
+    "Blue Cross: 3-claim summary; 830.00 is savings, not plan payment; payment is 561.00.",
+    "Jane Jones: printed total payment 43.06 differs from payment distribution 53.83; flag the inconsistency, do not silently replace the labeled total.",
+    "CMS blank template: do not extract the 400-dollar threshold as an estimate.",
+    "CMS scenarios: do not merge multiple providers/examples into one case."
+  ],
+  "samples": [
+    {
+      "file": "blue-cross-nc-eob.pdf",
+      "type": "eob",
+      "fields": {
+        "billed_total": "989.00",
+        "estimated_total": null,
+        "patient_responsibility": "159.00",
+        "plan_paid": "561.00"
+      },
+      "page": 1
+    },
+    {
+      "file": "healthcomp-eob.pdf",
+      "type": "eob",
+      "fields": {
+        "billed_total": "60.00",
+        "estimated_total": null,
+        "patient_responsibility": "20.00",
+        "plan_paid": "21.77"
+      },
+      "page": 1
+    },
+    {
+      "file": "jane-jones-eob.pdf",
+      "type": "eob",
+      "fields": {
+        "billed_total": "92.25",
+        "estimated_total": null,
+        "patient_responsibility": "10.77",
+        "plan_paid": "43.06"
+      },
+      "page": 1
+    },
+    {
+      "file": "cms-good-faith-estimate-blank.pdf",
+      "type": "good_faith_estimate",
+      "fields": {
+        "billed_total": null,
+        "estimated_total": null,
+        "patient_responsibility": null,
+        "plan_paid": null
+      },
+      "page": null
+    },
+    {
+      "file": "cms-estimate-vs-bill-examples.pdf",
+      "type": "educational_example",
+      "fields": {
+        "billed_total": null,
+        "estimated_total": null,
+        "patient_responsibility": null,
+        "plan_paid": null
+      },
+      "page": null
+    }
+  ]
+}

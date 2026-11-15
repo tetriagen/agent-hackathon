@@ -1,5 +1,10 @@
 # Project guidance
 
+Portfolio projects live in `projects/`; start with `projects/README.md`.
+`projects/clearbill/` is an independent snapshot, with its own instructions and
+tests. The root ClearBill app remains the live deployment source. Run each
+application's tests from its own directory; do not recursively collect both.
+
 This repository includes a Python / Streamlit hackathon starter and a ClearBill
 medical-bill scaffold. ClearBill uses `billing/` + `web/`; run with
 `python -m uvicorn billing.api:app --port 8000 --no-access-log`.

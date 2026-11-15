@@ -1,0 +1,85 @@
+{
+  "model": "SYNTHETIC-FIXTURE-NOT-A-LIVE-RESPONSE",
+  "provider": "gemini",
+  "seconds": 0,
+  "usage": null,
+  "requires_verification": true,
+  "extraction": {
+    "type": "eob",
+    "fields": {
+      "billed_total": {
+        "value": null,
+        "evidence": "",
+        "page": null
+      },
+      "estimated_total": {
+        "value": null,
+        "evidence": "",
+        "page": null
+      },
+      "patient_responsibility": {
+        "value": null,
+        "evidence": "",
+        "page": null
+      },
+      "plan_paid": {
+        "value": null,
+        "evidence": "",
+        "page": null
+      }
+    },
+    "warnings": [],
+    "payment_reconciliations": [],
+    "service_lines": [
+      {
+        "scope": "case1",
+        "scope_confirmed": true,
+        "page": 1,
+        "row": 1,
+        "service_date": "2026-10-20",
+        "code": "97110",
+        "modifiers": "",
+        "units": "1",
+        "charge": "75.00",
+        "currency": "USD",
+        "kind": "charge",
+        "service_context": "",
+        "evidence": "10/20/2026 | Code 97110 | Units 1 | Charge $75.00"
+      },
+      {
+        "scope": "case2",
+        "scope_confirmed": true,
+        "page": 1,
+        "row": 2,
+        "service_date": "2026-10-20",
+        "code": "97110",
+        "modifiers": "",
+        "units": "1",
+        "charge": "75.00",
+        "currency": "USD",
+        "kind": "charge",
+        "service_context": "",
+        "evidence": "10/20/2026 | Code 97110 | Units 1 | Charge $75.00"
+      }
+    ],
+    "service_lines_complete": true
+  },
+  "consistency": {
+    "status": "not_checked",
+    "checks": [],
+    "summary": "No comparable total-payment and payment-distribution sections were extracted. This does not mean the document is correct.",
+    "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+  },
+  "duplicates": {
+    "status": "no_candidates",
+    "coverage": "complete",
+    "rows_extracted": 2,
+    "rows_checked": 2,
+    "extraction_complete": true,
+    "findings": [],
+    "skipped": [],
+    "summary": "Possible duplicate groups: 0. Rows eligible for matching: 2.",
+    "limitation": "Only up to 12 extracted original rows are considered. This is exact matching within the same patient/provider/claim scope, not a full duplicate-billing audit. Missing dates, quantities or codes, different amounts and separate claims may hide duplicates. AI reading and scope can be wrong; verify original rows. No candidates does not mean the bill is correct."
+  },
+  "review_letter": null
+}

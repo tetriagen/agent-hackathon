@@ -1,0 +1,684 @@
+{
+  "method": "Five-sample compatibility comparison. Local rules use browser PDF.js/OCR text; AI receives original PDFs. Not an equal-input parser benchmark or general accuracy estimate.",
+  "status": "completed",
+  "samples": [
+    {
+      "file": "blue-cross-nc-eob.pdf",
+      "expected_type": "eob",
+      "local": {
+        "billed_total": {
+          "expected": "989.00",
+          "actual": "989.00",
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "159.00",
+          "actual": "159.00",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "561.00",
+          "actual": "561.00",
+          "correct": true
+        }
+      },
+      "http_status": 200,
+      "ai_result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "989.00",
+              "evidence": "Total Amount Provider(s) Charged: $989.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "159.00",
+              "evidence": "What Provider(s) May Bill You: $159.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "561.00",
+              "evidence": "The State Health Plan paid $561.00 towards the claims in this summary.",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": []
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "No comparable total-payment and payment-distribution sections were extracted. This does not mean the document is correct.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 3904,
+          "candidatesTokenCount": 230,
+          "totalTokenCount": 4134,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 784
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 3120
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.26,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": "989.00",
+          "actual": "989.00",
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "159.00",
+          "actual": "159.00",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "561.00",
+          "actual": "561.00",
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "sha256": "8f9366e3f88f9693855dc569cc93dbf4b715bae5667441d69b3250b7a7b6931a"
+    },
+    {
+      "file": "healthcomp-eob.pdf",
+      "expected_type": "eob",
+      "local": {
+        "billed_total": {
+          "expected": "60.00",
+          "actual": null,
+          "correct": false
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "20.00",
+          "actual": "20.00",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "21.77",
+          "actual": "21.77",
+          "correct": true
+        }
+      },
+      "http_status": 200,
+      "ai_result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "60.00",
+              "evidence": "60.00",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "20.00",
+              "evidence": "PATIENT RESPONSIBILITY 20.00",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "21.77",
+              "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [
+            {
+              "scope_label": "Claim 1",
+              "scope_evidence": "same_claim_block",
+              "same_scope": "confirmed",
+              "currency": "USD",
+              "reported_total": {
+                "value": "21.77",
+                "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+                "page": 1
+              },
+              "distribution_complete": true,
+              "payments": [
+                {
+                  "row_reference": "row1",
+                  "payee_role": "provider",
+                  "amount": {
+                    "value": "21.77",
+                    "evidence": "$ 21.77",
+                    "page": 1
+                  }
+                },
+                {
+                  "row_reference": "row2",
+                  "payee_role": "member",
+                  "amount": {
+                    "value": null,
+                    "evidence": "",
+                    "page": 1
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [
+            {
+              "rule": "payment_total_vs_distribution",
+              "scope": "Claim 1",
+              "scope_evidence": "same_claim_block",
+              "status": "not_checked",
+              "reported_total": "21.77",
+              "distribution_total": null,
+              "difference": null,
+              "sources": [
+                {
+                  "label": "Reported total payment",
+                  "value": "21.77",
+                  "evidence": "TOTAL PAYMENT AMOUNT 21.77",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution — provider (row1)",
+                  "value": "21.77",
+                  "evidence": "$ 21.77",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution — member (row2)",
+                  "value": null,
+                  "evidence": "",
+                  "page": 1
+                }
+              ],
+              "explanation": "An amount is missing or its source excerpt does not contain the extracted number."
+            }
+          ],
+          "summary": "Discrepancies: 0. Comparisons completed: 0. Skipped: 1.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 1824,
+          "candidatesTokenCount": 445,
+          "totalTokenCount": 2269,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1040
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 784
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.42,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": "60.00",
+          "actual": "60.00",
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "20.00",
+          "actual": "20.00",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "21.77",
+          "actual": "21.77",
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "sha256": "28ed90d67937e1bedd88a10e8abeb0951f9a90b17a81deea05719c1ab19f04bf"
+    },
+    {
+      "file": "jane-jones-eob.pdf",
+      "expected_type": "eob",
+      "local": {
+        "billed_total": {
+          "expected": "92.25",
+          "actual": null,
+          "correct": false
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "10.77",
+          "actual": null,
+          "correct": false
+        },
+        "plan_paid": {
+          "expected": "43.06",
+          "actual": "43.06",
+          "correct": true
+        }
+      },
+      "http_status": 200,
+      "ai_result": {
+        "extraction": {
+          "type": "eob",
+          "fields": {
+            "billed_total": {
+              "value": "92.25",
+              "evidence": "92.25",
+              "page": 1
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": "10.77",
+              "evidence": "10.77",
+              "page": 1
+            },
+            "plan_paid": {
+              "value": "43.06",
+              "evidence": "43.06",
+              "page": 1
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": [
+            {
+              "scope_label": "Claim 1",
+              "scope_evidence": "same_claim_block",
+              "same_scope": "confirmed",
+              "currency": "USD",
+              "reported_total": {
+                "value": "43.06",
+                "evidence": "43.06",
+                "page": 1
+              },
+              "distribution_complete": true,
+              "payments": [
+                {
+                  "row_reference": "row1",
+                  "payee_role": "provider",
+                  "amount": {
+                    "value": "53.83",
+                    "evidence": "$ 53.83",
+                    "page": 1
+                  }
+                },
+                {
+                  "row_reference": "row2",
+                  "payee_role": "provider",
+                  "amount": {
+                    "value": "0.00",
+                    "evidence": "$ 0.00",
+                    "page": 1
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "consistency": {
+          "status": "review_needed",
+          "checks": [
+            {
+              "rule": "payment_total_vs_distribution",
+              "scope": "Claim 1",
+              "scope_evidence": "same_claim_block",
+              "status": "mismatch",
+              "reported_total": "43.06",
+              "distribution_total": "53.83",
+              "difference": "10.77",
+              "sources": [
+                {
+                  "label": "Reported total payment",
+                  "value": "43.06",
+                  "evidence": "43.06",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution — provider (row1)",
+                  "value": "53.83",
+                  "evidence": "$ 53.83",
+                  "page": 1
+                },
+                {
+                  "label": "Payment distribution — provider (row2)",
+                  "value": "0.00",
+                  "evidence": "$ 0.00",
+                  "page": 1
+                }
+              ],
+              "explanation": "The printed total payment differs from the sum of payment-distribution rows. Ask the issuer to explain which section is correct."
+            }
+          ],
+          "summary": "Discrepancies: 1. Comparisons completed: 1. Skipped: 0.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 2344,
+          "candidatesTokenCount": 442,
+          "totalTokenCount": 2786,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 784
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1560
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.35,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": "92.25",
+          "actual": "92.25",
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": "10.77",
+          "actual": "10.77",
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": "43.06",
+          "actual": "43.06",
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "sha256": "45810eab3f48f56bca8997163a22d60d6a4959ed02e0d7f67ebee826a8eda71a"
+    },
+    {
+      "file": "cms-good-faith-estimate-blank.pdf",
+      "expected_type": "good_faith_estimate",
+      "local": {
+        "billed_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      },
+      "http_status": 200,
+      "ai_result": {
+        "extraction": {
+          "type": "good_faith_estimate",
+          "fields": {
+            "billed_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "plan_paid": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": []
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "Payment reconciliation currently supports EOB documents only.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 7024,
+          "candidatesTokenCount": 160,
+          "totalTokenCount": 7184,
+          "promptTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 6240
+            },
+            {
+              "modality": "TEXT",
+              "tokenCount": 784
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 2.14,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "sha256": "9acd311e99fa188dedbf6a0578065a5eed7597cbbe4ec90023a04a967e27624b"
+    },
+    {
+      "file": "cms-estimate-vs-bill-examples.pdf",
+      "expected_type": "educational_example",
+      "local": {
+        "billed_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      },
+      "http_status": 200,
+      "ai_result": {
+        "extraction": {
+          "type": "educational_example",
+          "fields": {
+            "billed_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "estimated_total": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "patient_responsibility": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            },
+            "plan_paid": {
+              "value": null,
+              "evidence": "",
+              "page": null
+            }
+          },
+          "warnings": [],
+          "payment_reconciliations": []
+        },
+        "consistency": {
+          "status": "not_checked",
+          "checks": [],
+          "summary": "Payment reconciliation currently supports EOB documents only.",
+          "limitation": "Checks use AI-extracted labels and scope. Verify both sections in the original PDF. A mismatch is not proof of an incorrect bill, money owed, or potential savings."
+        },
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "usage": {
+          "promptTokenCount": 1824,
+          "candidatesTokenCount": 158,
+          "totalTokenCount": 1982,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 784
+            },
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1040
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "seconds": 1.54,
+        "requires_verification": true
+      },
+      "ai": {
+        "billed_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "estimated_total": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "patient_responsibility": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        "plan_paid": {
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      },
+      "ai_type_correct": true,
+      "sha256": "7d6385232f56048ac3440a3b6f04793f7a6f44d762a7718fed7f068040fb1478"
+    }
+  ],
+  "provider": "gemini",
+  "date": "2026-11-15",
+  "prompt_sha256": "01773d714956c2fdbef1ba30bf194ea02fb5812520ad7f82b7d2c0a9a2a7e02f",
+  "scope": "EOB printed total payment versus complete payment distribution only. No service-line, coverage, legality or amount-owed verdict.",
+  "manual_review": {
+    "blue-cross-nc-eob.pdf": "No PAYMENT DISTRIBUTION block: not_checked is correct. Do not compare 830 savings with 561 plan payment.",
+    "healthcomp-eob.pdf": "Page 1: total payment 21.77 and provider distribution 21.77; EMP amount is blank, not printed zero. Null and conservative skip are appropriate. Model marked distribution_complete true despite a null row; server independently skips it.",
+    "jane-jones-eob.pdf": "Page 1: TOTAL PAYMENT AMOUNT 43.06; PAYMENT DISTRIBUTION provider 53.83 and EMP 0.00. Difference 10.77 is correct. AI mislabeled the zero EMP row as provider; payee role is not used in arithmetic and final UI labels rows neutrally. Excerpts for these amounts contain numbers without headings, so source semantics still require visual review.",
+    "cms-good-faith-estimate-blank.pdf": "Blank form: no populated case amounts or EOB payment comparison.",
+    "cms-estimate-vs-bill-examples.pdf": "Multiple independent teaching scenarios: no overall case amount or EOB payment comparison."
+  },
+  "successful_final_run_usage": {
+    "input": 16920,
+    "output": 1435,
+    "total": 18355,
+    "seconds": 10.71
+  },
+  "setup_attempts": "Before the final run: five failed batch requests and two diagnostic requests; observed provider error was HTTP 400 INVALID_ARGUMENT. One further successful Jane-only schema probe, excluded from this final run, consumed its own tokens. No automated retry or larger model was used. Final batch now stops on any request failure.",
+  "ui_validation": "Synthetic mocked responses only; no paid calls. Loading, consent, mismatch, equal totals, skipped checks, source pages, escaped text, fact non-overwrite, quota recovery, stale clearing, 390/1440px layout. One expected browser resource error from intentionally mocked HTTP 429; no JS page errors.",
+  "post_run_change": "Display labels now use neutral row references instead of AI-assigned payee roles; captured live responses below are unchanged."
+}

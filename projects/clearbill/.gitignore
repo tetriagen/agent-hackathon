@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+logs/
+data/*.db
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.playwright/
+.playwright-cli/
+artifacts/
+playwright-report/
+test-results/
+.taste-skill/

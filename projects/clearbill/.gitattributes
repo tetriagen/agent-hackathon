@@ -1,0 +1,4 @@
+# Generated PDF fixtures use byte offsets; never normalize line endings as text.
+tests/fixtures/duplicates/*.pdf binary
+# Preserve the vendored license's existing CRLF line endings.
+third_party/licenses/playwright-cli-LICENSE whitespace=cr-at-eol
