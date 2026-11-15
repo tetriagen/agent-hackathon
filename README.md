@@ -29,6 +29,23 @@ Use [the synthetic duplicate-service PDF](tests/fixtures/duplicates/duplicate.pd
 
 On November 15, 2026, the public deployment was checked through the complete browser flow with a real Gemini response: upload → local reading → consent → review → possible duplicate finding → confirmation → editable letter → successful TXT download. The $75 amount is a row charge, not a demonstrated saving. This single synthetic case does not establish accuracy across all medical documents.
 
+## Test PDFs for judges
+
+**To test the live site, download one of these PDFs and upload it using “Choose bill”.** These documents are synthetic and contain no real patient data.
+
+| Sample PDF | What to check |
+| --- | --- |
+| [Download duplicate.pdf](https://raw.githubusercontent.com/tetriagen/agent-hackathon/anesolves/clearbill/tests/fixtures/duplicates/duplicate.pdf) | Two identical $75 service rows. After remote review and verification, expect a possible-duplicate finding and a clarification letter. This was checked on the live site. |
+| [Download repeat.pdf](https://raw.githubusercontent.com/tetriagen/agent-hackathon/anesolves/clearbill/tests/fixtures/duplicates/repeat.pdf) | The second row has modifier `76` and describes a separate repeat encounter. With faithful extraction, the rules should not flag the two rows as an exact duplicate. |
+| [Download incomplete.pdf](https://raw.githubusercontent.com/tetriagen/agent-hackathon/anesolves/clearbill/tests/fixtures/duplicates/incomplete.pdf) | Quantities are missing. The rules should report incomplete/insufficient coverage rather than assert a duplicate. |
+
+1. Open [the review workspace](https://clearbill-5ay0.onrender.com/review.html) and upload a sample.
+2. Wait for local reading. For duplicate and payment checks, read the provider notice, consent, then click **Check your bill**.
+3. In **Verify findings**, compare the result with the original PDF. For the duplicate example, confirm the findings and choose **Next: prepare a letter**.
+4. Edit or download the draft. Nothing is sent to the insurer.
+
+The model's output can vary. The expected rule behavior above depends on accurate extraction. These EOB samples are not eligible inputs for the separate self-pay estimate comparison. For that flow, use the built-in **Try a synthetic example** button.
+
 ## Privacy and limits
 
 - Local PDF/text reading and OCR run in the browser. Merely selecting a file does not send the original PDF to the model.
