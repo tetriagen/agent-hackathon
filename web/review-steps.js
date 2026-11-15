@@ -20,7 +20,7 @@ export function refreshSteps() {
   $('letter-hint').hidden = !$('to-letter').disabled;
   $('letter-hint').textContent = tab === 'selfpay'
     ? 'Compare and confirm your amounts to prepare a letter.'
-    : 'A letter becomes available when AI review identifies a finding to clarify. You can also compare self-pay amounts in the other tab.';
+    : 'A letter becomes available when document review identifies a finding to clarify. You can also compare self-pay amounts in the other tab.';
   // Hidden required controls must not block the other workflow.
   $('panel-selfpay').querySelectorAll('input,select').forEach(el => { el.disabled = current !== 'verify' || tab !== 'selfpay'; });
 }

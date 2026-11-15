@@ -52,7 +52,7 @@ function suggest(kind) {
   const box = $(`${kind}-parsed`);
   box.replaceChildren();
   const heading = document.createElement('p');
-  heading.textContent = `Document type: ${parsed.type.replaceAll('_', ' ')}. Local rules, no language model.`;
+  heading.textContent = `Document type: ${parsed.type.replaceAll('_', ' ')}. Read locally in your browser.`;
   box.append(heading);
   const fields = document.createElement('dl');
   for (const [name, field] of Object.entries(parsed.fields)) {
@@ -95,7 +95,7 @@ for (const kind of ['estimate', 'bill']) {
     ocrUsed[kind] = false;
     invalidate();
     notice('Reading the document in your browser…');
-    beginProcessing('Reading your document…', 'Local reading stays in your browser. No AI upload.');
+    beginProcessing('Reading your document…', 'Your document stays in your browser during local reading.');
     try {
       const result = await readDocument(file, message => notice(message));
       if (token !== generation) return;
@@ -244,7 +244,7 @@ function renderInsuranceLetter(box, result, prepared) {
   const status = document.createElement('p');
   status.className = 'note';
   status.setAttribute('role', 'status');
-  status.textContent = 'Prepared from the findings. No extra AI request. Edits stay in this page and are lost on reload.';
+  status.textContent = 'Prepared from the findings. Edits stay in this page and are lost on reload.';
   const copy = document.createElement('button');
   copy.type = 'button';
   copy.textContent = 'Copy letter';
@@ -307,7 +307,7 @@ function renderConsistency(box, result) {
     const details = add('details', '', item);
     add('summary', 'Source amounts and PDF pages — verify in the original', details);
     const scopeReason = {same_claim_block:'Both sections appear in the same claim block.', matching_claim_reference:'The sections have matching claim references.', matching_payment_reference:'The sections have matching payment references.', unclear:'The relationship between these sections is unclear.'};
-    add('p', `AI scope assessment: ${scopeReason[check.scope_evidence] || 'Not established.'}`, details);
+    add('p', `Document relationship: ${scopeReason[check.scope_evidence] || 'Not established.'}`, details);
     const sources = add('ul', '', details);
     for (const source of check.sources) {
       add('li', `${source.label}: ${source.value === null ? 'not readable' : money.format(source.value)}${source.page ? ` · PDF page ${source.page}` : ''}. Excerpt: ${source.evidence || 'not available'}`, sources);
@@ -361,7 +361,7 @@ function updateAISelection() {
   const selected = selectedPDFs();
   $('ai-selection').textContent = selected.length
     ? `PDFs for review: ${selected.map(({file}) => file.name).join(' · ')}. Text files and pasted text are not sent.`
-    : 'Choose a PDF to use AI review. Text files and pasted text stay local.';
+    : 'Choose a PDF to check your bill. Text files and pasted text stay local.';
 }
 async function reviewPDF(kind, file) {
   const box = $(`${kind}-ai-result`);
@@ -371,7 +371,7 @@ async function reviewPDF(kind, file) {
   try {
     const response = await fetch('/api/extract', {method:'POST', headers:{'Content-Type':'application/pdf','X-AI-Consent':'send-original-pdf','X-AI-Provider':aiProvider}, body:file, signal:abort.signal});
     const data = await response.json();
-    if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'AI extraction failed.');
+    if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Document review failed.');
     const result = data.extraction;
     renderConsistency(box, data.consistency);
     renderDuplicates(box, data.duplicates);
@@ -379,34 +379,34 @@ async function reviewPDF(kind, file) {
     const extractionDetails = document.createElement('details');
     extractionDetails.className = 'extraction-details';
     const extractionSummary = document.createElement('summary');
-    extractionSummary.textContent = 'Compare local reading and AI extraction';
+    extractionSummary.textContent = 'Review extracted details';
     extractionDetails.append(extractionSummary);
     box.append(extractionDetails);
-    const title = document.createElement('h3'); title.textContent = 'Local rules vs AI'; extractionDetails.append(title);
+    const title = document.createElement('h3'); title.textContent = 'Document details'; extractionDetails.append(title);
     const info = document.createElement('p');
-    info.textContent = `Local type: ${local.type}. AI type: ${result.type}. Model: ${data.model}. ${data.seconds}s. AI fields are suggestions: verify each one against the PDF. Local rules used the editable text above; AI read the original PDF.`; extractionDetails.append(info);
+    info.textContent = `Local reading: ${local.type}. PDF review: ${result.type}. Extracted fields are suggestions: verify each one against your PDF. Local reading uses the editable text; PDF review uses the original file.`; extractionDetails.append(info);
     for (const [name, field] of Object.entries(result.fields)) {
       const item = document.createElement('p');
       const localValue = local.fields[name]?.value;
-      item.textContent = `${name.replaceAll('_', ' ')} — Local: ${localValue === null || localValue === undefined ? 'not found' : money.format(localValue)} · AI: ${field.value === null ? 'not found' : money.format(field.value)}${field.page ? ` · PDF page ${field.page}` : ''}`;
+      item.textContent = `${name.replaceAll('_', ' ')} — Local: ${localValue === null || localValue === undefined ? 'not found' : money.format(localValue)} · PDF review: ${field.value === null ? 'not found' : money.format(field.value)}${field.page ? ` · PDF page ${field.page}` : ''}`;
       extractionDetails.append(item);
-      if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`AI source excerpt (verify): ${field.evidence}`; extractionDetails.append(source); }
+      if (field.evidence) { const source = document.createElement('p'); source.className='note'; source.textContent=`Source excerpt (verify): ${field.evidence}`; extractionDetails.append(source); }
     }
     for (const warning of result.warnings) { const p=document.createElement('p');p.className='note';p.textContent=warning;extractionDetails.append(p); }
   } finally { clearTimeout(timeout); }
 }
 $('review-ai').addEventListener('click', async () => {
   if (reading || controller) return;
-  if (!aiProvider) { notice('AI is not configured. Local reading still works.', true); return; }
+  if (!aiProvider) { notice('Document review is unavailable. Local reading still works.', true); return; }
   const selected = selectedPDFs();
-  if (!selected.length) { notice('Select an original PDF before using AI. Pasted text is not sent.', true); return; }
-  if (!$('ai-consent').checked) { notice(`Confirm sending the selected PDFs to ${aiProviderLabel} first.`, true); $('ai-consent').focus(); return; }
+  if (!selected.length) { notice('Select an original PDF to check your bill. Pasted text is not sent.', true); return; }
+  if (!$('ai-consent').checked) { notice(`Confirm the document-sharing consent below first.`, true); $('ai-consent').focus(); return; }
   if (selected.some(({file}) => file.size > 10 * 1024 * 1024)) { notice('Each PDF must be no larger than 10 MB.', true); return; }
   for (const {kind} of selected) clearAI(kind);
   refreshSteps();
   reading++;
   $('controls').disabled = true; $('demo').disabled = true; $('reset').disabled = true;
-  beginProcessing('Reviewing your documents…', `The selected PDFs are being reviewed with ${aiProviderLabel}.`);
+  beginProcessing('Reviewing your document…', 'Checking payment totals and repeated services in your selected PDFs.');
   let completed = 0;
   try {
     for (const {kind, file} of selected) {
@@ -418,11 +418,11 @@ $('review-ai').addEventListener('click', async () => {
     await finishProcessing('Your findings are ready to verify.');
     showReviewTab('findings');
     showReviewStep('verify');
-    notice(`AI review complete for ${completed} PDF${completed === 1 ? '' : 's'}. Verify the findings against your originals. Nothing has been sent to your insurer.`);
+    notice(`Review complete for ${completed} PDF${completed === 1 ? '' : 's'}. Verify the findings against your originals. Nothing has been sent to your insurer.`);
   } catch (error) {
     failProcessing();
     refreshSteps();
-    const reason = error.name === 'AbortError' ? 'AI request timed out.' : error.message;
+    const reason = error.name === 'AbortError' ? 'Document review timed out.' : error.message;
     notice(`${reason} ${completed} of ${selected.length} PDFs reviewed. Completed findings remain available through Next; local reading still works.`, true);
   } finally {
     reading--; $('notice').classList.remove('busy');
@@ -439,7 +439,7 @@ async function configureAI() {
     if (!response.ok) return;
     const health = await response.json();
     if (!health.ai_enabled || !['openai', 'gemini'].includes(health.ai_provider)) {
-      $('ai-privacy').textContent = 'AI is unavailable on this server. Local document reading still works.';
+      $('ai-privacy').textContent = 'Document review is unavailable. Local reading still works.';
       return;
     }
     aiProvider = health.ai_provider;
@@ -449,7 +449,7 @@ async function configureAI() {
       ? 'Gemini Free Tier may use submitted data to improve Google products. Use public samples or synthetic documents for this demo.'
       : 'AI sends the original unredacted PDF to OpenAI. Verify the extracted values before using them.';
     $('review-ai').disabled = false;
-  } catch { $('ai-privacy').textContent = 'Could not check AI availability. Local reading still works.'; }
+  } catch { $('ai-privacy').textContent = 'Could not check service availability. Local reading still works.'; }
 }
 setupReviewSteps(() => reading > 0 || Boolean(controller));
 configureAI();

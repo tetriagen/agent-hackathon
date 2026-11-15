@@ -30,7 +30,7 @@
       <div class="workspace-actions"><button class="btn btn--secondary" type="button" id="demo">Try a synthetic example</button><button class="btn btn--secondary" type="button" id="reset">Clear this case</button></div>
     </div>
     <ol class="workflow" aria-label="Review process"><li aria-current="step"><span>01</span> Read documents</li><li><span>02</span> Verify findings</li><li><span>03</span> Prepare a letter</li></ol>
-    <div id="privacy" class="privacy-panel"><div class="privacy-heading"><span aria-hidden="true">↗</span><strong>Your privacy comes first.</strong></div><p>Your documents are sent for AI review only with your consent. <a href="#privacy">How we handle your documents ↗</a></p></div>
+    <div id="privacy" class="privacy-panel"><div class="privacy-heading"><span aria-hidden="true">↗</span><strong>Your privacy comes first.</strong></div><p>Your documents are sent for review only with your consent. <a href="#privacy">How we handle your documents ↗</a></p></div>
     <p id="notice" role="status" aria-live="polite"></p>
   <form id="review-form">
     <fieldset id="controls">
@@ -57,10 +57,10 @@
       </div>
 
       <div class="ai-controls shared-ai"><p class="ai-heading">Review your documents <span>Find inconsistencies</span></p>
-      <p id="ai-selection" class="note">Choose a PDF to use AI review. Text files and pasted text stay local.</p>
+      <p id="ai-selection" class="note">Choose a PDF to check your bill. Text files and pasted text stay local.</p>
       <p id="ai-privacy" class="note" aria-live="polite"></p>
       <label class="check"><input id="ai-consent" type="checkbox" name="ai-consent"><span>I agree to send the selected original PDFs to <span class="ai-provider">the configured AI provider</span>. They may contain personal information and are not redacted. Editing the text above does not change the PDFs sent.</span></label>
-      <button class="btn btn--primary" type="button" id="review-ai" disabled>Review with AI <span aria-hidden="true">↗</span></button></div>
+      <button class="btn btn--primary" type="button" id="review-ai" disabled>Check your bill <span aria-hidden="true">↗</span></button></div>
       <div class="step-actions"><span>Next, check what your documents say.</span><button type="button" id="to-verify" class="btn btn--secondary">Next: verify findings →</button></div>
       </section>
       <section id="step-verify" class="review-step" hidden aria-labelledby="verify-title">
@@ -70,7 +70,7 @@
       <p id="findings-empty">No document findings yet. Go back to upload a document, or use Self-pay comparison to enter amounts manually.</p>
 <section id="estimate-findings" class="finding-document" hidden><h3>Your estimate</h3><p id="estimate-evidence" class="note"></p><div id="estimate-parsed"></div><div id="estimate-ai-result"></div></section>
 <section id="bill-findings" class="finding-document" hidden><h3>Your bill or EOB</h3><p id="bill-evidence" class="note"></p><div id="bill-parsed"></div><div id="bill-ai-result"></div></section>
-<p class="note">Local reading extracts amounts only. Payment inconsistencies and repeated services require the optional AI review on the previous step.</p>
+<p class="note">Local reading extracts amounts only. Payment inconsistencies and repeated services require the document review on the previous step.</p>
       </div>
       <div id="panel-selfpay" role="tabpanel" aria-labelledby="tab-selfpay" hidden>
       <div class="comparison-panel"><div class="comparison-intro"><h2>Check the difference.</h2><p>For care paid without insurance, confirm your estimate and final bill below.</p></div><div class="comparison-fields">
@@ -108,7 +108,7 @@
       </section>
       <section id="step-letter" class="review-step" hidden aria-labelledby="letter-title">
       <h2 id="letter-title" tabindex="-1">Prepare a letter.</h2>
-      <p id="letter-empty">No letter is available yet. Compare your self-pay amounts or run the optional AI review to check for findings that support a clarification request.</p>
+      <p id="letter-empty">No letter is available yet. Compare your self-pay amounts or run a document review to check for findings that support a clarification request.</p>
       <div id="selfpay-letter" hidden>    <h3>Draft request</h3>
     <p>This is a request for an explanation, not a submitted complaint. Add your details after downloading.</p>
     <pre id="letter"></pre>
