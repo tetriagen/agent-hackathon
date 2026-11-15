@@ -1,5 +1,8 @@
 # Набор для дизайна и проверки интерфейса
 
+Источники референсов для следующих сайтов — Details.so, Refero.design и Design Spells —
+сохранены с пояснениями и ссылкой на исходный рилс в [DESIGN.md](../DESIGN.md#сайты-для-поиска-референсов).
+
 Подготовлены именно три пункта: DESIGN.md, Vercel Web Design Guidelines и Playwright CLI.
 Taste Skill и Image to Code не добавлены. Конкретный кейс не выбран.
 
